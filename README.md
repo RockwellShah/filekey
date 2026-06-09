@@ -11,10 +11,10 @@ FileKey is an offline web app that lets you quickly encrypt and share files usin
 - ✅ **Free & Open Source** – Licensed under GPLv3.
 - ✅ **Accountless** – No logins, no tracking, no cloud.
 - ✅ **Passkey-Based Encryption** – Uses your existing passkey, password manager, or hardware security key.
-- ✅ **End-to-End Encrypted** – Files are sealed with AES-256 on your device. Nothing is ever uploaded.
-- ✅ **Secure Sharing** – Encrypt a file to someone's Share Key, or post a "send me a file" link so anyone can send *you* an encrypted file.
-- ✅ **Recovery Codes** – An optional one-time recovery code plus a self-contained offline recovery tool, so you're never locked out.
-- ✅ **Folders & Large Files** – Encrypt whole folders, and stream multi-gigabyte files straight to disk without freezing the tab.
+- ✅ **No Cloud** – Files are sealed with AES-256 on your device. Nothing is ever uploaded.
+- ✅ **Secure Sharing** – Encrypt a file to someone's Share Key, or post a "send me a file" link.
+- ✅ **Recovery Codes** – Optional offline recovery codes so you're never locked out.
+- ✅ **Folders & Large Files** – Encrypt whole folders, and stream multi-gigabyte files easily.
 - ✅ **Offline** – Runs 100% in your browser, online or offline. Installable as a PWA.
 
 ---
