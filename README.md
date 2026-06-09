@@ -1,20 +1,18 @@
 # 🔐 FileKey
 
-FileKey is an offline web app that lets you quickly encrypt and share files using passkeys. No accounts, no tracking, no backend servers. Just local, offline security powered by the passkey you already have.
+FileKey is an offline web app that lets you quickly encrypt and share files using passkeys. No accounts, no tracking, no cloud. Just local, offline security powered by passkeys.
 
 > 🛡️ **FileKey is open source and privacy-first.** Live at **[filekey.app](https://filekey.app)**.
-
-> **New in 1.1:** FileKey was rebuilt on a standards-based encryption format (HPKE, [RFC 9180](https://www.rfc-editor.org/rfc/rfc9180.html)) so it now works reliably on **Safari, iPhone, and iPad** — not just Chrome-based browsers.
 
 ---
 
 ### 🚀 Features
 
 - ✅ **Free & Open Source** – Licensed under GPLv3.
-- ✅ **Accountless by Design** – No logins, no tracking, no servers.
+- ✅ **Accountless** – No logins, no tracking, no cloud.
 - ✅ **Passkey-Based Encryption** – Uses your existing passkey, password manager, or hardware security key.
 - ✅ **End-to-End Encrypted** – Files are sealed with AES-256 on your device. Nothing is ever uploaded.
-- ✅ **Secure Sharing** – Encrypt a file to someone's **Share Key**, or post a **"send me a file"** link so anyone can send *you* an encrypted file.
+- ✅ **Secure Sharing** – Encrypt a file to someone's Share Key, or post a "send me a file" link so anyone can send *you* an encrypted file.
 - ✅ **Recovery Codes** – An optional one-time recovery code plus a self-contained offline recovery tool, so you're never locked out.
 - ✅ **Folders & Large Files** – Encrypt whole folders, and stream multi-gigabyte files straight to disk without freezing the tab.
 - ✅ **Offline** – Runs 100% in your browser, online or offline. Installable as a PWA.
@@ -47,13 +45,13 @@ FileKey needs a passkey provider that supports the WebAuthn **PRF extension** �
 | Platform | Passkey providers | Notes |
 |----------|-------------------|-------|
 | **macOS** | Apple Passwords, 1Password, YubiKey | Safari ≥ 17 or Chrome ≥ 112. YubiKeys may not work in Safari. |
-| **iOS / iPadOS** | Apple Passwords, 1Password | Safari ≥ 17 or Chrome ≥ 112. **Now fully supported in 1.1.** |
+| **iOS / iPadOS** | Apple Passwords, 1Password | Safari ≥ 17 or Chrome ≥ 112. |
 | **Windows** | 1Password, YubiKey | Edge ≥ 112 or Chrome ≥ 112. Requires Windows 11. |
 | **Android** | Google Password Manager, 1Password, YubiKey | Chrome ≥ 112. |
 | **Linux** | YubiKey (via browser) | Recent Chrome / Chromium browsers. |
 
 > ⚠️ **Notes:**
-> - The provider must implement the WebAuthn **PRF** extension; support varies by app and version, so if a manager doesn't work yet, it likely hasn't shipped PRF.
+> - The provider must implement the WebAuthn PRF extension; support varies by app and version, so if a manager doesn't work yet, it likely hasn't shipped PRF.
 > - Chromium-based browsers (Brave, Vivaldi, Opera) generally work.
 > - Windows 10 and earlier don't support PRF.
 
@@ -61,21 +59,21 @@ FileKey needs a passkey provider that supports the WebAuthn **PRF extension** �
 
 ### 🛠️ How the Encryption Works
 
-FileKey derives your encryption identity from a passkey. When you create your FileKey, a passkey is registered against the app's domain (`filekey.app`) as the relying party. Authenticating runs the passkey's **PRF extension** over a fixed input, producing a deterministic secret that never leaves your device. That secret is run through **HKDF-SHA-256** to derive your long-term identity key pair — so the same passkey always reproduces the same identity, and nothing has to be stored beyond the passkey itself.
+FileKey derives your encryption identity from a passkey. When you create your FileKey, a passkey is registered against the app's domain (`filekey.app`) as the relying party. Authenticating runs the passkey's PRF extension over a fixed input, producing a deterministic secret that never leaves your device. That secret is run through HKDF-SHA-256 to derive your long-term identity key pair, so the same passkey always reproduces the same identity, and nothing has to be stored beyond the passkey itself.
 
-Files are encrypted with **HPKE** (Hybrid Public Key Encryption, [RFC 9180](https://www.rfc-editor.org/rfc/rfc9180.html)) in **Auth mode**, using the **DHKEM-P256 + HKDF-SHA-256** suite. HPKE derives fresh per-file keys, and the file body is sealed with **AES-256-GCM** in a streaming, chunked construction so files of any size encrypt and decrypt without being held entirely in memory. Encrypting to yourself uses your own public key; sharing uses the recipient's. Every operation runs entirely on your device through audited crypto libraries.
+Files are encrypted with HPKE (Hybrid Public Key Encryption, [RFC 9180](https://www.rfc-editor.org/rfc/rfc9180.html)) in Auth mode, using the DHKEM-P256 + HKDF-SHA-256 suite. HPKE derives fresh per-file keys, and the file body is sealed with AES-256-GCM in a streaming, chunked construction so files of any size encrypt and decrypt without being held entirely in memory. Encrypting to yourself uses your own public key; sharing uses the recipient's. Every operation runs entirely on your device through audited crypto libraries.
 
-> 🛡️ Your passkey is the only credential — there's nothing else to store, and nothing ever leaves your device.
+> 🛡️ Your passkey is the only credential. There's nothing else to store, and nothing ever leaves your device.
 
 ---
 
 ### 🔁 Sharing
 
-Every FileKey user has a unique **Share Key** — a long public string you'll find in the menu under **"Your Share Key."** It's safe to share openly; it's a public address, not a secret.
+Every FileKey user has a unique Share Key — a long public string you'll find in the menu under "Your Share Key." It's safe to share openly; it's a public address, not a secret.
 
 #### 📤 Sharing a file
 
-1. Choose **Share** when encrypting (or send to a saved contact).
+1. Choose Share when encrypting (or send to a saved contact).
 2. Enter the recipient's Share Key.
 3. FileKey produces a file only that recipient can open, named `name.shared.filekey`. Send it by any method — email, messaging, file transfer.
 
@@ -87,23 +85,23 @@ Every FileKey user has a unique **Share Key** — a long public string you'll fi
 
 #### 📨 "Send me a file"
 
-Share a **"send me a file"** link (it embeds your Share Key). Anyone — no account, no passkey — can use it to encrypt a file *to you* right in their browser, then send you the result. Only you can open it.
+Share a "send me a file" link (it embeds your Share Key). Anyone — no account, no passkey — can use it to encrypt a file *to you* right in their browser, then send you the result. Only you can open it.
 
 #### 🔐 Security details
 
-- Your private keys **never** leave your device.
+- Your private keys never leave your device.
 - Shared files are locked to a specific recipient (public-key, end-to-end).
-- All encryption and decryption happen **on your device** — no servers involved.
-- Files are sealed with **AES-256**.
+- All encryption and decryption happen on your device — no servers involved.
+- Files are sealed with AES-256.
 - Your Share Key is public and can be shared openly.
 
 ---
 
 ### 🔑 Recovery Codes
 
-Because your identity comes from your passkey, losing that passkey would normally mean losing access. FileKey offers an optional **recovery code** — a 24-word phrase (BIP39) or a short `fkeyrec1…` string (Bech32m) — that backs up your identity. Save it once, keep it somewhere safe, and you can restore access later.
+Because your identity comes from your passkey, losing that passkey would normally mean losing access. FileKey offers an optional recovery code — a 24-word phrase (BIP39) that backs up your identity. Save it once, keep it somewhere safe, and you can restore access later.
 
-FileKey also ships a **self-contained offline recovery tool** (`recover.html`): a single HTML file you can keep on disk. With your recovery code it decrypts your `.filekey` files entirely offline — even if the FileKey website ever disappears.
+FileKey also ships a self-contained offline recovery tool (`recover.html`): a single HTML file you can keep on disk. With your recovery code it decrypts your `.filekey` files entirely offline, even if the FileKey website ever disappears.
 
 ---
 
@@ -115,13 +113,13 @@ Two safety nets:
 2. **Install FileKey as an app** so it keeps working offline:
 
 #### 💻 Desktop (Chrome / Edge / Brave)
-Open FileKey, click the **Install** icon in the address bar, and confirm. It opens as a standalone offline app.
+Open FileKey, click the Install icon in the address bar, and confirm. It opens as a standalone offline app.
 
 #### 📱 iOS / iPadOS (Safari)
-Open FileKey in Safari → tap **Share** → **Add to Home Screen** → **Add**.
+Open FileKey in Safari → tap Share → Add to Home Screen → Add.
 
 #### 🤖 Android (Chrome / Edge / Brave / Samsung Internet)
-Open FileKey → tap **Add to Home screen** (banner or ⋮ menu) → confirm.
+Open FileKey → tap Add to Home screen (banner or ⋮ menu) → confirm.
 
 Because FileKey is a static site with no backend, you can also self-host it (see below).
 
@@ -145,7 +143,7 @@ The build output is plain static files — host them on any static host or your 
 
 ### 📦 Older Files
 
-FileKey 1.1 uses a new, standards-based format and **cannot open files made by the original FileKey** (v1 used an elliptic curve that Apple platforms reject — the reason for the rewrite). Old files still open at **[v1.filekey.app](https://v1.filekey.app)** with the same passkey, and FileKey links you there automatically when it detects one. The original v1 source lives on the [`v1` branch](../../tree/v1).
+FileKey 1.1 uses a new, standards-based format and cannot open files made by the original FileKey. Old files still open at **[v1.filekey.app](https://v1.filekey.app)** with the same passkey, and FileKey links you there automatically when it detects one. The original v1 source lives on the [`v1` branch](../../tree/v1).
 
 ---
 
