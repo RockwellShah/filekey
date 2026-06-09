@@ -25,13 +25,13 @@ FileKey is an offline web app that lets you quickly encrypt and share files usin
    Create a passkey stored in your password manager or security key (iCloud Keychain, Google Password Manager, 1Password, a YubiKey, etc.).
 
 2. **Encrypt files**<br>
-   Drop any file — or a whole folder — into FileKey. It's encrypted instantly with AES-256 and saved as `name.filekey`.
+   Drop any file (or a whole folder) into FileKey. It's encrypted instantly with AES-256 and saved as `name.filekey`.
 
 3. **Decrypt files**<br>
    Drop the encrypted file back in. Your passkey unlocks it, locally and securely.
 
 4. **Share privately**<br>
-   Encrypt a file to someone's Share Key — only they can open it — or share a "send me a file" link to receive encrypted files from anyone.
+   Encrypt a file to someone's Share Key (only they can open it), or share a "send me a file" link to receive encrypted files from anyone.
 
 5. **Save a recovery code**<br>
    Optionally save a one-time recovery code so you can get back into your files even if you lose your passkey.
@@ -40,7 +40,7 @@ FileKey is an offline web app that lets you quickly encrypt and share files usin
 
 ### 💾 Supported Systems
 
-FileKey needs a passkey provider that supports the WebAuthn **PRF extension** — a compatible password manager (Apple Passwords, Google Password Manager, 1Password, etc.) or a FIDO2 hardware security key (YubiKey 5 / Bio Series). Your browser and OS must also support WebAuthn + PRF. A non-exhaustive compatibility table:
+FileKey needs a passkey provider that supports the WebAuthn **PRF extension**: a compatible password manager (Apple Passwords, Google Password Manager, 1Password, etc.) or a FIDO2 hardware security key (YubiKey 5 / Bio Series). Your browser and OS must also support WebAuthn + PRF. A non-exhaustive compatibility table:
 
 | Platform | Passkey providers | Notes |
 |----------|-------------------|-------|
@@ -69,13 +69,13 @@ Files are encrypted with HPKE (Hybrid Public Key Encryption, [RFC 9180](https://
 
 ### 🔁 Sharing
 
-Every FileKey user has a unique Share Key — a long public string you'll find in the menu under "Your Share Key." It's safe to share openly; it's a public address, not a secret.
+Every FileKey user has a unique Share Key, a long public string you'll find in the menu under "Your Share Key." It's safe to share openly; it's a public address, not a secret.
 
 #### 📤 Sharing a file
 
 1. Choose Share when encrypting (or send to a saved contact).
 2. Enter the recipient's Share Key.
-3. FileKey produces a file only that recipient can open, named `name.shared.filekey`. Send it by any method — email, messaging, file transfer.
+3. FileKey produces a file only that recipient can open, named `name.shared.filekey`. Send it by any method: email, messaging, file transfer.
 
 #### 📥 Receiving a shared file
 
@@ -85,13 +85,13 @@ Every FileKey user has a unique Share Key — a long public string you'll find i
 
 #### 📨 "Send me a file"
 
-Share a "send me a file" link (it embeds your Share Key). Anyone — no account, no passkey — can use it to encrypt a file *to you* right in their browser, then send you the result. Only you can open it.
+Share a "send me a file" link (it embeds your Share Key). Anyone (no account, no passkey) can use it to encrypt a file *to you* right in their browser, then send you the result. Only you can open it.
 
 #### 🔐 Security details
 
 - Your private keys never leave your device.
 - Shared files are locked to a specific recipient (public-key, end-to-end).
-- All encryption and decryption happen on your device — no servers involved.
+- All encryption and decryption happen on your device, with no servers involved.
 - Files are sealed with AES-256.
 - Your Share Key is public and can be shared openly.
 
@@ -99,7 +99,7 @@ Share a "send me a file" link (it embeds your Share Key). Anyone — no account,
 
 ### 🔑 Recovery Codes
 
-Because your identity comes from your passkey, losing that passkey would normally mean losing access. FileKey offers an optional recovery code — a 24-word phrase (BIP39) that backs up your identity. Save it once, keep it somewhere safe, and you can restore access later.
+Because your identity comes from your passkey, losing that passkey would normally mean losing access. FileKey offers an optional recovery code, a 24-word phrase (BIP39) that backs up your identity. Save it once, keep it somewhere safe, and you can restore access later.
 
 FileKey also ships a self-contained offline recovery tool (`recover.html`): a single HTML file you can keep on disk. With your recovery code it decrypts your `.filekey` files entirely offline, even if the FileKey website ever disappears.
 
@@ -109,7 +109,7 @@ FileKey also ships a self-contained offline recovery tool (`recover.html`): a si
 
 Two safety nets:
 
-1. **The offline recovery tool** (above) opens your files with just your recovery code — no website required.
+1. **The offline recovery tool** (above) opens your files with just your recovery code, no website required.
 2. **Install FileKey as an app** so it keeps working offline:
 
 #### 💻 Desktop (Chrome / Edge / Brave)
@@ -137,7 +137,7 @@ bun run build:web   # build the app
 bun run serve       # serve it locally
 ```
 
-The build output is plain static files — host them on any static host or your own server.
+The build output is plain static files. Host them on any static host or your own server.
 
 ---
 
@@ -155,11 +155,11 @@ French cybersecurity blogger Korben wrote a nice [breakdown of FileKey](https://
 
 ### 🔗 Links
 
-> 🔒 **[filekey.app](https://filekey.app)** — the app
+> 🔒 **[filekey.app](https://filekey.app)** – the app
 >
-> 📜 **[Substack](https://filekey.substack.com/)** — our blog
+> 📜 **[Substack](https://filekey.substack.com/)** – our blog
 >
-> 💬 **[Signal Group](https://signal.group/#CjQKIDpdakX0nr1V00ciNv3dsWCFZgUwm_NylulFJz4VOUJ_EhBtY-bq759RNExzcCWMUGIB)** — chat with us
+> 💬 **[Signal Group](https://signal.group/#CjQKIDpdakX0nr1V00ciNv3dsWCFZgUwm_NylulFJz4VOUJ_EhBtY-bq759RNExzcCWMUGIB)** – chat with us
 
 ---
 
