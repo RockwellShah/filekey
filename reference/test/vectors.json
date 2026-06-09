@@ -1,0 +1,123 @@
+{
+  "spec_version": "0.4.7",
+  "suite": "FKEYv1-AUTH-P256-AES256GCM-STREAM64K",
+  "note": "Reproducible KAT vectors. Identity uses fixed prf_secret; files use the §11.1 deterministic-ephemeral carveout (fixed ekm). Regenerate with `bun run vectors`.",
+  "identity": {
+    "canonical_rp_id": "filekey.app",
+    "namespace_tag": "f1d38151",
+    "sender": {
+      "prf_secret": "1111111111111111111111111111111111111111111111111111111111111111",
+      "master_prk": "86f375c428447a9952cfa38ef4ff7909133479e6f78d27769802423a2e21c33b",
+      "static_pk": "049388ce1eb595c478a21d0f8e8e517675f0c339f262e73d5b6896a64de41a4e10e2a8740a87c3f4cae95385c72847b51c6495f695f085a946458538550f54897a",
+      "share_key": "fkey1q8ca8q23q2fc3ns7kk2ug79zr58carj3we6lpsee7f3ww02mdzt2vn0yrf8pqumq2f7",
+      "fingerprint": "raw wolf lunar globe twice syrup",
+      "fingerprint_hex": "b29f9a14",
+      "recovery_bip39": "manage option illegal explain element erosion enroll virtual moment pony tattoo banana crew diagram orange vast cherry regular above love pepper axis artefact gasp",
+      "recovery_bech32m": "fkeyrec1q8ca8q23smeht3pgg3afj5k05w80flmepyfng70x77xjwa5cqfpr5t3pcvasaqm3eh"
+    },
+    "recipient": {
+      "prf_secret": "2222222222222222222222222222222222222222222222222222222222222222",
+      "static_pk": "04ac4fed11366429fd73eba02caf895303736c99fd189c23dbd714fe0d7db5e6296318ece61bb8f9287b194a210d7c8153fcaa25cad35c8699aecdb9321fdeb454",
+      "share_key": "fkey1q8ca8q23q2kylmg3xejznltnawszetuf2vphxmyel5vfcg7m6u20urtakhnzjzae5yd",
+      "fingerprint": "almost kite exile minute rate throw"
+    }
+  },
+  "files": [
+    {
+      "name": "empty-self",
+      "self_encrypted": true,
+      "plaintext_size": 0,
+      "plaintext_sha256_prefix": "e3b0c44298fc1c14",
+      "recipient_share_key": "fkey1q8ca8q23q2fc3ns7kk2ug79zr58carj3we6lpsee7f3ww02mdzt2vn0yrf8pqumq2f7",
+      "ekm": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "file_size": 243,
+      "file_sha256": "f3a4cae7f0c9c0e9dce04ca933285c2de5e7018785741995be30a274b21d6ced",
+      "file_hex": "464b455901010000f1d38151049388ce1eb595c478a21d0f8e8e517675f0c339f262e73d5b6896a64de41a4e10e2a8740a87c3f4cae95385c72847b51c6495f695f085a946458538550f54897a04fd7742d8282d007cadb315dd6dcb7075b7a67dd187010c09deb891c792ad20506be9c97664e6df4292e8b1305b47b1e30a83c61376af92efac663e59f8e9d83b00000051d26ad83d951f3110562581151656d2b59357ed313c706baacff3d90308bce2b20959edbdb429531b0e62a22716ca52685fee17f61611c2d4f2980f8794b8167f780e0fb053b66cfefa45ce8456d67162d04fb402868319b92f20c34d17b2fa6f5f"
+    },
+    {
+      "name": "one-byte-self",
+      "self_encrypted": true,
+      "plaintext_size": 1,
+      "plaintext_sha256_prefix": "dabd3aff769f07eb",
+      "recipient_share_key": "fkey1q8ca8q23q2fc3ns7kk2ug79zr58carj3we6lpsee7f3ww02mdzt2vn0yrf8pqumq2f7",
+      "ekm": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "file_size": 247,
+      "file_sha256": "63f112dd5bcb2702be0e4ce5853072909345d022257a5e6d637dc3b1c85b6bf2",
+      "file_hex": "464b455901010000f1d38151049388ce1eb595c478a21d0f8e8e517675f0c339f262e73d5b6896a64de41a4e10e2a8740a87c3f4cae95385c72847b51c6495f695f085a946458538550f54897a04fd7742d8282d007cadb315dd6dcb7075b7a67dd187010c09deb891c792ad20506be9c97664e6df4292e8b1305b47b1e30a83c61376af92efac663e59f8e9d83b00000054d26ad83d8a1532050f3ed5121617c7fe9d58ad53551e73cbbf9bd41a1bb1ffb80743abbdb972590c5774a27800df4d0d3e8317f61611c2d4f2990f8794b8167f78d2bc2d18cd69dd21861f7c9286761333bc503c6721bf26e458b3dac14e0d33278cfe09f5"
+    },
+    {
+      "name": "sub-chunk-self",
+      "self_encrypted": true,
+      "plaintext_size": 100,
+      "plaintext_sha256_prefix": "2fd0e351cc6d78ae",
+      "recipient_share_key": "fkey1q8ca8q23q2fc3ns7kk2ug79zr58carj3we6lpsee7f3ww02mdzt2vn0yrf8pqumq2f7",
+      "ekm": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "file_size": 347,
+      "file_sha256": "b8087e3800a87281e14e2a15329584ba58a7bb510d4415567648a5011f9b6bcc",
+      "file_hex": "464b455901010000f1d38151049388ce1eb595c478a21d0f8e8e517675f0c339f262e73d5b6896a64de41a4e10e2a8740a87c3f4cae95385c72847b51c6495f695f085a946458538550f54897a04fd7742d8282d007cadb315dd6dcb7075b7a67dd187010c09deb891c792ad20506be9c97664e6df4292e8b1305b47b1e30a83c61376af92efac663e59f8e9d83b00000055d26ad83d890929020f3fc4131d5199e89452e51f5e191dcbbf83ad0b1badfab20556b6bbb83319004065b3215ed84b1a3a8f7af61611c2d4f2986b8794b8167f78d2bc2d19936b37feca3bf7564fd1e0a9b4166cc267d9273510e2b07b518507bdda7c90d4c82fff856abd82ecb2cfc1751ac8ed34dee4685fc1494d4fa44ec4207e2709dca9763641ea67c8da3267051b5f01723e4ab4c389f8edf50103c042bd486536b5a9a635e66e4f8957bde1552559753aaf177a561bb054cdfdcc423c24feea506c47454cba"
+    },
+    {
+      "name": "exact-64k-self",
+      "self_encrypted": true,
+      "plaintext_size": 65536,
+      "plaintext_sha256_prefix": "9d4b90ad9fabb10e",
+      "recipient_share_key": "fkey1q8ca8q23q2fc3ns7kk2ug79zr58carj3we6lpsee7f3ww02mdzt2vn0yrf8pqumq2f7",
+      "ekm": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "file_size": 65783,
+      "file_sha256": "9ccb22d9be9fd0cde4009f40de46a7d2ad0420583259fc49007f741fea4850d0",
+      "file_hex": null
+    },
+    {
+      "name": "64k-plus-1-shared",
+      "self_encrypted": false,
+      "plaintext_size": 65537,
+      "plaintext_sha256_prefix": "cb038ea84fe7e905",
+      "recipient_share_key": "fkey1q8ca8q23q2kylmg3xejznltnawszetuf2vphxmyel5vfcg7m6u20urtakhnzjzae5yd",
+      "ekm": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "file_size": 65803,
+      "file_sha256": "ca7112f50aa110fc0cdc75ea97509305c0030da783e9d508abc3179e3e31e969",
+      "file_hex": null
+    },
+    {
+      "name": "multi-chunk-shared",
+      "self_encrypted": false,
+      "plaintext_size": 200000,
+      "plaintext_sha256_prefix": "3b3ab939d06289fa",
+      "recipient_share_key": "fkey1q8ca8q23q2kylmg3xejznltnawszetuf2vphxmyel5vfcg7m6u20urtakhnzjzae5yd",
+      "ekm": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "file_size": 200299,
+      "file_sha256": "5a24aa0aac7997406bb513d3ae9ede164a6f90db7c12783be6cf3e4f20f53355",
+      "file_hex": null
+    }
+  ],
+  "negative_descriptors": [
+    {
+      "name": "flip-payload-byte",
+      "expect": "auth_failed"
+    },
+    {
+      "name": "forge-namespace-tag",
+      "expect": "wrong_namespace"
+    },
+    {
+      "name": "drop-last-chunk",
+      "expect": "auth_failed-or-truncated"
+    },
+    {
+      "name": "append-trailing-bytes",
+      "expect": "rejected"
+    },
+    {
+      "name": "wrong-recipient",
+      "expect": "auth_failed"
+    },
+    {
+      "name": "bad-utf8-filename",
+      "expect": "filename_utf8 (rejected at encode)"
+    },
+    {
+      "name": "duplicate-extras-key",
+      "expect": "extras_duplicate"
+    }
+  ]
+}

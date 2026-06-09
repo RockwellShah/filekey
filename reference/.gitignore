@@ -1,0 +1,8 @@
+node_modules/
+web/dist/
+web/source.txt
+web/recover.html
+*.log
+.DS_Store
+.gstack/
+.vercel
