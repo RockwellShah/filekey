@@ -7,6 +7,7 @@ import { dirname, join } from "node:path";
 
 const webDir = dirname(fileURLToPath(import.meta.url));
 const root = join(webDir, "..");
+const APP_VERSION = JSON.parse(readFileSync(join(webDir, "version.json"), "utf8")).current;
 
 // Human-readable source, in reading order. The built bundle (web/dist) is omitted.
 const files = [
@@ -34,8 +35,8 @@ const files = [
 
 const bar = "=".repeat(78);
 let out =
-  "FileKey — reference implementation, full source\n" +
-  "Spec v0.4.7 · HPKE (DHKEM P-256 + HKDF-SHA-256 + AES-256-GCM, namespaced) · passkey (WebAuthn PRF)\n" +
+  "FileKey reference implementation, full source\n" +
+  `v${APP_VERSION} · HPKE (DHKEM P-256 + HKDF-SHA-256 + AES-256-GCM, namespaced) · passkey (WebAuthn PRF)\n` +
   "Everything runs in the browser. No account, no server, nothing uploaded.\n";
 
 for (const f of files) {
