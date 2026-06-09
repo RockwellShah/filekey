@@ -21,19 +21,19 @@ FileKey is an offline web app that lets you quickly encrypt and share files usin
 
 ### 👨‍💻 How to Use FileKey
 
-1. **Create your FileKey**
+1. **Create your FileKey**<br>
    Create a passkey stored in your password manager or security key (iCloud Keychain, Google Password Manager, 1Password, a YubiKey, etc.).
 
-2. **Encrypt files**
+2. **Encrypt files**<br>
    Drop any file — or a whole folder — into FileKey. It's encrypted instantly with AES-256 and saved as `name.filekey`.
 
-3. **Decrypt files**
+3. **Decrypt files**<br>
    Drop the encrypted file back in. Your passkey unlocks it, locally and securely.
 
-4. **Share privately**
+4. **Share privately**<br>
    Encrypt a file to someone's Share Key — only they can open it — or share a "send me a file" link to receive encrypted files from anyone.
 
-5. **Save a recovery code**
+5. **Save a recovery code**<br>
    Optionally save a one-time recovery code so you can get back into your files even if you lose your passkey.
 
 ---
