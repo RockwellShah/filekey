@@ -1,6 +1,6 @@
 # 🔐 FileKey
 
-FileKey is an offline web app that lets you quickly encrypt and share files using passkeys. No accounts, no tracking, no cloud. Just local, offline security powered by passkeys.
+FileKey is an offline web app that lets you quickly encrypt and share files using passkeys. No accounts, no tracking, no cloud.
 
 > 🛡️ **FileKey is free, open source, and privacy-first.** Live at **[filekey.app](https://filekey.app)**.
 
