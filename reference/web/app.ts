@@ -56,6 +56,10 @@ const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const $ = (id: string) => document.getElementById(id)!;
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+// Strip Unicode bidi override/embedding/isolate controls (U+202A–202E, U+2066–2069). A sender-controlled
+// filename like "photo<U+202E>gpj.exe" otherwise displays/saves as "photo.jpg" but lands on disk as .exe.
+// Override/isolate chars only — NOT the LRM/RLM marks (U+200E/200F) that legitimate RTL filenames use.
+const stripBidi = (s: string) => s.replace(/[\u202a-\u202e\u2066-\u2069]/g, "");
 let mainInner: HTMLElement;
 let identity: Identity | null = null;
 let allowAutoScroll = false; // suppressed during the intro so the page doesn't auto-scroll on load (mobile)
@@ -193,6 +197,7 @@ class StatusMsg {
 // Middle-ellipsis for filenames: pin the tail (extension) and ellipsize the head, so a long name
 // like "Screenshot ….png.filekey" stays one clean line instead of breaking mid-word on mobile.
 function fnameHtml(filename: string): string {
+  filename = stripBidi(filename); // neutralize bidi-override extension spoofing before display
   const safe = esc(filename);
   if (filename.length <= 16) return `<span class="file_title" title="${safe}">${safe}</span>`;
   const tailLen = Math.min(12, Math.ceil(filename.length * 0.35));
@@ -244,7 +249,7 @@ async function sendFile(blob: Blob, filename: string) {
   }
 }
 
-function sanitizeName(name: string) { return (name.replace(/[\/\\]/g, "_").replace(/[\x00-\x1f]/g, "").trim() || "filekey-output").slice(0, 200); }
+function sanitizeName(name: string) { return (stripBidi(name).replace(/[\/\\]/g, "_").replace(/[\x00-\x1f]/g, "").trim() || "filekey-output").slice(0, 200); }
 // Best-effort detection of a storage-constrained context (notably private/incognito, which caps
 // origin storage hard) so a large-file failure can say so rather than a generic "try again".
 async function storageTooSmallFor(bytes: number): Promise<boolean> {

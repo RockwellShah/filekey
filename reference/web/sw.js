@@ -2,8 +2,10 @@
 // Precaches the app shell so FileKey installs as a PWA and runs fully offline
 // (the crypto is all client-side). Strategy: network-first, so an online reload
 // always gets fresh code, falling back to cache when offline.
-const CACHE = "filekey-ref-v5";
-const SHELL = ["/", "/index.html", "/dist/app.js", "/recover.html", "/manifest.json", "/icon.svg", "/logo.svg", "/fonts/inter.woff2"];
+const CACHE = "filekey-ref-v6";
+// /dist/worker.js is precached so large-file (>=64MB) encrypt/decrypt works offline on first run, not
+// only after a prior online large-file op network-cached it.
+const SHELL = ["/", "/index.html", "/dist/app.js", "/dist/worker.js", "/recover.html", "/manifest.json", "/icon.svg", "/logo.svg", "/fonts/inter.woff2"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
