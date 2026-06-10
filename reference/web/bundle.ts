@@ -3,7 +3,7 @@
 // folders via the drag-drop entry API — and zips them into one archive. app.ts then encrypts
 // that archive as a single .filekey. Decryption is unchanged: it yields the .zip, which the
 // user unpacks themselves. So this is an encrypt-side-only concern.
-import { zip, Zip, ZipPassThrough, type Zippable } from "fflate";
+import { Zip, ZipPassThrough } from "fflate";
 
 export interface BundleItem {
   /** Path inside the archive ("MyFolder/sub/file.txt"), or just the filename for a loose file. */
@@ -136,26 +136,4 @@ export function zipBundleToBlob(
       archive.end();
     })().catch(reject);
   });
-}
-
-/** Zip the items (reading each File) into one archive. Dedupes any colliding paths. */
-export async function zipBundle(items: BundleItem[]): Promise<Uint8Array> {
-  const data: Zippable = {};
-  const seen = new Set<string>();
-  for (const it of items) {
-    let p = it.path;
-    if (seen.has(p)) {
-      const dot = p.lastIndexOf(".");
-      const stem = dot > 0 ? p.slice(0, dot) : p;
-      const ext = dot > 0 ? p.slice(dot) : "";
-      let n = 2;
-      while (seen.has(`${stem} (${n})${ext}`)) n++;
-      p = `${stem} (${n})${ext}`;
-    }
-    seen.add(p);
-    data[p] = new Uint8Array(await it.file.arrayBuffer());
-  }
-  return new Promise<Uint8Array>((resolve, reject) =>
-    zip(data, { level: 6 }, (err, out) => (err ? reject(err) : resolve(out))),
-  );
 }

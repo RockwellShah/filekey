@@ -423,7 +423,10 @@ function renderIdentityHeader(): void {
 async function loadSecKey() {
   if (identity) return;
   if ((await prfBrowserSupport()) === false) { await showPrfUnsupported(false); return; }
-  try { const prf = await getPrfSecret(); identity = await deriveIdentityFromPrf(prf, NS); }
+  try {
+    const prf = await getPrfSecret();
+    try { identity = await deriveIdentityFromPrf(prf, NS); } finally { prf.fill(0); } // scrub the PRF secret once identity is derived (best-effort)
+  }
   catch (e) {
     console.error("FileKey: authentication failed —", e);
     if ((e as Error).name === "NotAllowedError") return;
@@ -817,9 +820,15 @@ async function sendToMode(toKey: string, rawName?: string) {
   try { decodeShareKey(toKey, SET); }
   catch { await appMsg(["This link is invalid or incomplete. Ask for a fresh one."], ERR); return; }
   const name = (rawName || "").trim().slice(0, 60);
-  const to = name || "the recipient";
-  await appMsg([{ t: name ? `Send ${name} a file.` : "Send a secure file.", b: true },
-    ` Drop a file anywhere, or use the buttons below. It's encrypted on your device so only ${to} can open it. No account or app needed.`]);
+  // The name comes straight from the link (#name=), so it's unverified. Never assert it as the verified
+  // recipient ("only Mom can open it"). State what's cryptographically true (only the link's keyholder can
+  // open it) and nudge the sender to confirm the link's provenance for anything sensitive.
+  const segs: Seg[] = [
+    { t: name ? `Send a file to “${name}”.` : "Send a secure file.", b: true },
+    " Drop a file anywhere, or use the buttons below. It's encrypted in your browser so only the owner of this link's key can open it. No account or app needed.",
+  ];
+  if (name) segs.push(` “${name}” is just the label on this link, so if you're sending anything sensitive, confirm the link really came from them.`);
+  await appMsg(segs);
   const drop = $("drop_container");
   drop.style.display = "flex";
   const dropLabel = drop.querySelector(".file_title") as HTMLElement | null;
@@ -847,7 +856,10 @@ async function sendToMode(toKey: string, rawName?: string) {
 async function handleSendTo(items: BundleItem[], toKey: string, name: string) {
   if (!items.length) return;
   const sender = await deriveThrowawayIdentity();
-  const opts = { sender, who: name || undefined, remember: false };
+  // Don't pass the link's (unverified) name as the recipient label: the post-encrypt confirmation would
+  // otherwise read 'encrypted for "<attacker-chosen name>"'. Anonymous senders have no contacts, so this
+  // falls back to the neutral "for your recipient". (`name` is still shown, framed as a claim, in sendToMode.)
+  const opts = { sender, remember: false };
   if (items.length === 1 && !items[0]!.fromFolder) {
     const f = items[0]!.file;
     uploadCard(f.name, "File", false);
@@ -930,9 +942,14 @@ async function revealRecovery() {
   // Re-verify with the passkey before revealing the recovery code (a bearer secret), and derive
   // master_prk on demand instead of keeping it resident in the Identity between uses.
   let masterPrk: Uint8Array;
-  try { masterPrk = masterPrkFromPrfSecret(await getPrfSecret()); }
+  try {
+    const prf = await getPrfSecret();
+    masterPrk = masterPrkFromPrfSecret(prf);
+    prf.fill(0); // scrub the PRF secret as soon as master_prk is derived
+  }
   catch { await appMsg(["Passkey check cancelled, so the recovery code wasn't shown."], ERR); return; }
   const bip39 = encodeRecoveryBip39(masterPrk);
+  masterPrk.fill(0); // the BIP39 string now carries the code for display; drop the raw master-PRK bytes
   // Same mono-inset format as the share key, but word-break:normal so the phrase wraps at spaces (whole words).
   const msg = appShell();
   const intro = document.createElement("span"); msg.appendChild(intro);

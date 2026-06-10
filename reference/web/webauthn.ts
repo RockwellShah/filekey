@@ -58,14 +58,18 @@ export function deploymentRpId(): string {
 export async function enrollPasskey(displayName: string): Promise<void> {
   const cred = (await navigator.credentials.create({
     publicKey: {
-      rp: { id: deploymentRpId(), name: "FileKey Reference" },
+      rp: { id: deploymentRpId(), name: "FileKey" },
       user: { id: bs(randomBytes(16)), name: displayName || "FileKey", displayName: displayName || "FileKey" },
       challenge: bs(randomBytes(32)),
       pubKeyCredParams: [
         { type: "public-key", alg: -7 }, // ES256
         { type: "public-key", alg: -257 }, // RS256
       ],
-      authenticatorSelection: { residentKey: "required", userVerification: "preferred" },
+      // userVerification MUST be "required": the WebAuthn PRF (CTAP2 hmac-secret) returns a DIFFERENT
+      // secret for UV vs non-UV assertions (CredRandomWithUV vs CredRandomWithoutUV). "preferred" lets a
+      // later assertion silently skip UV, derive a different secret → a different identity that can't open
+      // the user's files. "required" pins one PRF secret AND blocks a stolen no-PIN security key.
+      authenticatorSelection: { residentKey: "required", userVerification: "required" },
       timeout: 60_000,
       extensions: { prf: {} } as AuthenticationExtensionsClientInputs,
     },
@@ -87,7 +91,7 @@ export async function getPrfSecret(): Promise<Uint8Array> {
     publicKey: {
       rpId: deploymentRpId(),
       challenge: bs(randomBytes(32)),
-      userVerification: "preferred",
+      userVerification: "required", // MUST match enrollment: PRF returns a different secret without UV (see enrollPasskey)
       timeout: 60_000,
       extensions: {
         prf: { eval: { first: bs(PRF_INPUT_SALT) } },

@@ -16,6 +16,7 @@ const files = [
   "web/contacts.ts",
   "web/recover.ts",
   "web/bundle.ts",
+  "web/worker.ts",
   "web/webauthn.ts",
   "web/serve.ts",
   "web/sw.js",
