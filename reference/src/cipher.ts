@@ -107,7 +107,7 @@ async function* sealStream(input: EncryptStreamInput, ekm?: ArrayBuffer | Crypto
   const sender = await suite.createSenderContext({
     recipientPublicKey,
     info,
-    senderKey: senderIdentity.keyPair.privateKey,
+    senderKey: senderIdentity.keyPair, // full keyPair, not the bare privateKey: @hpke then uses our public key directly and never reconstructs it via exportKey, so the private key can be non-extractable (identity.ts)
     ...(ekm ? { ekm } : {}),
   });
   const hpkeEnc = new Uint8Array(sender.enc);
@@ -280,7 +280,7 @@ export async function decryptStream(input: DecryptStreamInput): Promise<DecryptS
   try {
     const senderPublicKey = await suite.kem.deserializePublicKey(toArrayBuffer(senderPk));
     recipient = await suite.createRecipientContext({
-      recipientKey: identity.keyPair.privateKey,
+      recipientKey: identity.keyPair, // full keyPair (see sealStream): lets the private key be non-extractable
       enc: toArrayBuffer(hpkeEnc),
       info,
       senderPublicKey,

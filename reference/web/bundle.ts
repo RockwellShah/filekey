@@ -92,8 +92,8 @@ const ZIP_READ_CHUNK = 4 * 1024 * 1024; // read source files in 4MB slices when 
  * Stream the items into a zip Blob (Blob-of-Blobs, disk-backed) without ever holding the whole archive —
  * or any whole source file — in memory. Stored (no compression) so framing stays cheap and non-blocking;
  * the payload is encrypted afterward anyway, and bundles are usually already-compressed media. `onRead`
- * reports cumulative source bytes consumed (for progress). This is the large-folder counterpart to
- * {@link zipBundle}, which buffers the whole archive and is fine only for small bundles.
+ * reports cumulative source bytes consumed (for progress). This is the only zipper on the encrypt path;
+ * every multi-file/folder bundle streams through it.
  */
 export function zipBundleToBlob(
   items: BundleItem[],

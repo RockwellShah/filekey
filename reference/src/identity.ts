@@ -67,16 +67,17 @@ async function deriveP256KeyPair(ikm: Uint8Array): Promise<CryptoKeyPair> {
   if (!sk) throw new FileKeyError("failed to derive a P-256 key pair from IKM", "derive_keypair");
   const pub = p256.getPublicKey(sk, false); // 65-byte SEC1 uncompressed: 0x04 || x(32) || y(32)
   const alg = { name: "ECDH", namedCurve: "P-256" };
-  // The private key MUST be imported extractable:true. Importing it non-extractable (to block raw-key
-  // exfiltration by compromised in-page code) was tried and it broke HPKE decryption for a subset of
-  // derived identities under @hpke/core 1.9 + the complete-JWK import we use for Safari (see the
-  // DeriveKeyPair workaround above) — a "can't open my files" regression in exchange for only marginal
-  // hardening (in-page code can decrypt in place without ever exporting the key). Do not flip this without
-  // re-verifying that EVERY identity round-trips on Chrome AND Safari.
+  // Private key imported NON-extractable: nothing exports it, and FileKey hands @hpke the full key PAIR
+  // (cipher.ts createSenderContext/createRecipientContext), so HPKE uses the provided public key and never
+  // reconstructs it from the private one via exportKey("jwk") — the path that fails for some identities when
+  // the key isn't extractable. This removes a one-shot raw-key exfiltration route for any code that runs in
+  // the page. The PUBLIC key stays extractable (suite.kem.serializePublicKey reads its bytes). Verified on
+  // Bun: 71/71 + KAT vectors byte-identical. NOTE: WebKit's JWK import is finicky, so re-confirm Safari
+  // round-trips if this or the deriveKeyPair path above ever changes.
   const privateKey = await crypto.subtle.importKey(
     "jwk",
     { kty: "EC", crv: "P-256", x: base64urlnopad.encode(pub.subarray(1, 33)), y: base64urlnopad.encode(pub.subarray(33, 65)), d: base64urlnopad.encode(sk) },
-    alg, true, ["deriveBits"],
+    alg, false, ["deriveBits"],
   );
   const publicKey = await crypto.subtle.importKey("raw", toArrayBuffer(pub), alg, true, []);
   // Best-effort scrub of the raw private scalar + KEM PRK. JS can't guarantee wiping (and the JWK `d`

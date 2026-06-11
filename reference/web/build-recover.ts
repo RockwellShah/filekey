@@ -3,6 +3,7 @@
 // can decrypt with just their recovery code if FileKey ever disappears.
 // Run: bun run web/build-recover.ts  (also invoked by build:web)
 import { writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -20,18 +21,20 @@ if (!result.success) {
 }
 let js = await result.outputs[0]!.text();
 js = js.replace(/<\/script>/gi, "<\\/script>"); // safe to inline even if a string contains </script>
+// Hash the exact inline-script bytes so the CSP can allow THIS script by sha256, not by 'unsafe-inline'.
+// That refuses any OTHER inline <script> (an injected one), not just external ones.
+const scriptHash = createHash("sha256").update(js).digest("base64");
 
-// Strict no-egress CSP: default-src 'none' denies every fetch directive by default, so the only things
-// that load are the inline <script>/<style> we explicitly allow. connect-src 'none' blocks all
-// fetch/XHR/WebSocket/beacon and (with no script-src host) an injected external <script> can't load or
-// exfiltrate via its URL — the page physically cannot phone home. Inline <script>/<style> and blob
-// downloads still work (a `download` anchor isn't a CSP fetch).
+// Strict no-egress CSP. default-src 'none' denies every fetch directive by default; script-src is pinned to
+// the sha256 of our one inline bundle, so NO other script runs — inline-injected or external; connect-src
+// 'none' blocks all fetch/XHR/WebSocket/beacon. Net: the only code that executes is our hashed bundle, and it
+// physically cannot phone home. Inline <style> (created at runtime) and blob downloads still work.
 const html = `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'none'; font-src 'none'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-${scriptHash}'; style-src 'unsafe-inline'; img-src 'none'; font-src 'none'; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <title>FileKey · Offline Recovery</title>
 </head>
 <body>
