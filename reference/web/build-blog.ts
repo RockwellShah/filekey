@@ -95,7 +95,13 @@ function parse(raw: string): { meta: Record<string, string>; body: string } {
   const m = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
   if (!m) return { meta: {}, body: raw };
   const meta: Record<string, string> = {};
-  for (const line of m[1].split("\n")) { const mm = line.match(/^([a-zA-Z0-9_]+):\s*(.*)$/); if (mm) meta[mm[1]] = mm[2].trim(); }
+  for (const line of m[1].split("\n")) {
+    const mm = line.match(/^([a-zA-Z0-9_]+):\s*(.*)$/);
+    if (!mm) continue;
+    let v = mm[2].trim();
+    if (v.length >= 2 && ((v[0] === '"' && v.endsWith('"')) || (v[0] === "'" && v.endsWith("'")))) v = v.slice(1, -1);
+    meta[mm[1]] = v;
+  }
   return { meta, body: m[2] };
 }
 function fmtDate(iso: string): string { const [y, mo, d] = iso.split("-").map(Number); return MONTHS[mo - 1] + " " + d + ", " + y; }
