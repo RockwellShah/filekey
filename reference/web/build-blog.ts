@@ -131,7 +131,7 @@ function chips(activeKey: string, cats: typeof CATEGORIES): string {
   return '<nav class="chips">' + all + rest + "</nav>";
 }
 function ctaCard(): string {
-  return '<aside class="cta"><div><h4>Send files the safe way</h4><p>Free, open source, end-to-end encrypted. No account needed.</p></div><a class="btn" href="/">Open FileKey</a></aside>';
+  return '<aside class="cta"><div><h4>Share files the safe way</h4><p>Free, open source, end-to-end encrypted. No account needed.</p></div><a class="btn" href="/">Open FileKey</a></aside>';
 }
 function header(): string {
   return '<header class="hd"><div class="wrap hd-in"><a class="brand" href="/blog/"><svg class="mk" width="17" height="21" viewBox="0 0 22 27" aria-hidden="true">' + MARK + '</svg><span class="wm">FileKey</span><span class="badge">Blog</span></a><div class="hd-right"><button class="theme-btn" type="button" id="themeBtn" aria-label="Switch theme">' + SUN + '</button><a class="btn" href="/">Open FileKey</a></div></div></header>';
