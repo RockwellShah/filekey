@@ -124,11 +124,23 @@ body{margin:0;}
 .dc_txt_container{display: flex;flex-direction: column;justify-content: center;flex-grow:1;}
 .dc_txt_container .file_title{font-weight:600;}
 .dc_buttons{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.dc_btn{font-family:'Inter';font-size:15px;font-weight:600;line-height:1;padding:11px 18px;border-radius:10px;cursor:pointer;border:1px solid transparent;white-space:nowrap;}
+.dc_btn{font-family:'Inter';font-size:15px;font-weight:600;line-height:1;padding:11px 18px;border-radius:10px;cursor:pointer;border:1px solid transparent;white-space:nowrap;transition:background .18s ease,transform .18s cubic-bezier(.4,0,.2,1),box-shadow .18s ease;}
 .dc_btn_primary{background:#1377F9;color:#fff;}
 .dc_btn_primary:hover{background:#0e63d6;}
 .dc_btn_ghost{background:#fff;color:#0d0d0d;border-color:#0000001f;font-weight:500;}
 .dc_btn_ghost:hover{background:#f4f4f4;}
+/* First-run auth buttons: real buttons in the chat flow (Unlock / Create), reusing the .dc_btn
+   vocabulary. The intro's two choices live in a button row, not two inline links (DESIGN.md). On hover
+   the button lifts and its icon animates: the fingerprint scales, the plus quarter-spins. */
+.auth_row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+.auth_btn{display:inline-flex;align-items:center;gap:8px;}
+.auth_btn svg{width:17px;height:17px;flex:none;transition:transform .2s cubic-bezier(.4,0,.2,1);}
+.auth_btn .plus_icon{fill:#1377F9;}
+.auth_btn.dc_btn_primary:hover{transform:translateY(-1px);box-shadow:0 4px 14px #1377f940;}
+.auth_btn.dc_btn_primary:hover .fp_icon{transform:scale(1.12);}
+.auth_btn.dc_btn_ghost:hover{transform:translateY(-1px);box-shadow:0 4px 12px #00000012;}
+.auth_btn.dc_btn_ghost:hover .plus_icon{transform:rotate(90deg);}
+@media (prefers-reduced-motion:reduce){.dc_btn,.auth_btn svg{transition:none;}.auth_btn:hover{transform:none;}}
 
 
 #file_input{display:none;}

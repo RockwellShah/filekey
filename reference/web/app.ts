@@ -1,7 +1,7 @@
 // FileKey reference web app.
 // UI/flow is a faithful reproduction of filekey v1 (source.txt): typewriter chat
 // (char_speed = characters per animation frame), the filekey "dp" badge on each
-// message, two-step auth (generate -> "Now tap to authenticate"), animated
+// message, two-step auth (generate -> "Now tap to unlock"), animated
 // Encrypting/Decrypting status, upload-right / download-left cards with Share+Save,
 // the hamburger ("chiz") menu with v1's verbatim content panels.
 //
@@ -38,6 +38,10 @@ const SVG = {
   edit: `<svg viewBox="0 0 23.6475 23.3041"><rect height="23.3041" opacity="0" width="23.6475" x="0" y="0"/><path d="M15.5591 4.88935L6.08643 4.88935C5.10986 4.88935 4.56299 5.41669 4.56299 6.43232L4.56299 17.5163C4.56299 18.5319 5.10986 19.0495 6.08643 19.0495L17.2095 19.0495C18.186 19.0495 18.7231 18.5319 18.7231 17.5163L18.7231 8.12957L20.2954 6.55445L20.2954 17.5944C20.2954 19.6159 19.27 20.6218 17.229 20.6218L6.05713 20.6218C4.02588 20.6218 2.99072 19.6159 2.99072 17.5944L2.99072 6.34443C2.99072 4.33271 4.02588 3.31708 6.05713 3.31708L17.1313 3.31708Z"/><path d="M9.61182 14.2936L11.5161 13.4636L20.6372 4.35224L19.2993 3.03388L10.188 12.1452L9.30908 13.9811C9.23096 14.1472 9.42627 14.3718 9.61182 14.2936ZM21.3599 3.63935L22.063 2.91669C22.395 2.56513 22.395 2.09638 22.063 1.77412L21.8384 1.53974C21.5356 1.23701 21.0571 1.27607 20.7349 1.58857L20.022 2.29169Z"/></svg>`,
   outbound: `<svg viewBox="0 0 24 24" class="outbound_link"><path d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>`,
   import: `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>`,
+  // Unlock button's "touch to unlock" biometric affordance (a fingerprint). Stroke-based so it inherits
+  // the button's text color via currentColor — white on the solid-blue Unlock button. This is a biometric
+  // cue, NOT the identity-verification fingerprint deliberately left unbuilt (see DESIGN.md Appendix A).
+  fingerprint: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 8 4"/><path d="M5 19.5C5.5 18 6 15 6 12c0-.7.12-1.37.34-2"/><path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M8.65 22c.21-.66.45-1.32.57-2"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path d="M2 16h.01"/><path d="M21.8 16c.2-2 .131-5.354 0-6"/><path d="M9 6.8a6 6 0 0 1 9 5.2c0 .47 0 1.17-.02 2"/></svg>`,
 };
 
 // External-link affordance: the menu's box-arrow glyph, inline, inheriting the link's color.
@@ -147,6 +151,22 @@ function actionRow(host: HTMLElement, actions: { label: string; muted?: boolean;
     s.textContent = a.label;
     s.addEventListener("click", a.onClick);
     row.appendChild(s);
+  }
+  host.appendChild(row);
+  scrollToBottom();
+}
+// Like actionRow, but renders REAL buttons (the .dc_btn vocabulary: solid-blue primary + ghost outline)
+// with an optional leading icon — for the first-run moment that earns a tappable button over an inline
+// link (Unlock / Create). DESIGN.md: distinct choices belong in a row, never two inline links.
+function buttonRow(host: HTMLElement, buttons: { label: string; icon?: string; ghost?: boolean; onClick: () => void }[]): void {
+  const row = document.createElement("div");
+  row.className = "auth_row";
+  for (const b of buttons) {
+    const btn = document.createElement("button");
+    btn.className = `dc_btn auth_btn ${b.ghost ? "dc_btn_ghost" : "dc_btn_primary"} no_select`;
+    btn.innerHTML = `${b.icon ?? ""}<span>${esc(b.label)}</span>`;
+    btn.addEventListener("click", b.onClick);
+    row.appendChild(btn);
   }
   host.appendChild(row);
   scrollToBottom();
@@ -339,7 +359,7 @@ function runCryptoJob(job: Record<string, unknown>, onProgress?: JobProgress): {
   return { result, cancel: () => end(() => resolveOutcome({ cancelled: true })) };
 }
 
-// ---- identity (v1 genNewPasskey -> "Now tap to authenticate" -> loadSecKey) ----
+// ---- identity (v1 genNewPasskey -> "Now tap to unlock" -> loadSecKey) ----
 // Per-browser record of filekeys created here (timestamps only — no keys, no secrets, so it's fine under
 // the "no secrets stored" rule). Two uses: warn before an accidental *second* filekey (a separate identity
 // whose files won't interchange), and give additional keys a dated name so the OS passkey picker can tell
@@ -402,7 +422,7 @@ async function doEnroll(additional: boolean) {
   }
   recordCreated(now);
   createdThisSession = true; // brand-new user: skip the recovery reminder on the create -> authenticate hop
-  await appMsg(["Filekey created. ", { link: "Now tap to authenticate", onClick: () => void loadSecKey() }, "."], { speed: 4 });
+  await appMsg(["Filekey created. ", { link: "Now tap to unlock", onClick: () => void loadSecKey() }, "."], { speed: 4 });
 }
 // Glanceable identity for the Your FileKey menu. No passkey name is available on
 // auth, so we derive a deterministic identicon + 8-char fingerprint from the public
@@ -436,10 +456,10 @@ async function loadSecKey() {
     console.error("FileKey: authentication failed —", e);
     if ((e as Error).name === "NotAllowedError") return;
     if (/PRF/i.test((e as Error).message)) { await showPrfUnsupported(false); return; }
-    await appMsg([`Authentication failed. Please try again.`], ERR); return;
+    await appMsg([`Failed to unlock. Please try again.`], ERR); return;
   }
   await Contacts.loadContacts(identity!, SET); // local address book (public keys + your nicknames), decrypted into memory
-  await appMsg(["Filekey authenticated. Now drop files to encrypt or decrypt them!"]);
+  await appMsg(["Filekey unlocked. Now drop files to encrypt or decrypt them!"]);
   $("drop_container").style.display = "flex";
   document.body.classList.add("fk-authed"); // reveals the Your FileKey control (sliders) in the top bar
   renderIdentityHeader();
@@ -1213,7 +1233,11 @@ async function intro() {
     " group or ",
     { html: extLinkDot("https://filekey.substack.com/", "Substack") },
   ], { speed: 12 });
-  await appMsg(["To start, ", { link: "create", onClick: () => void genNewPasskey() }, " a new filekey or ", { link: "authenticate", onClick: () => void loadSecKey() }, " your existing filekey."]);
+  const m = await appMsg(["To start, unlock your existing filekey or create a new one."]);
+  buttonRow(m, [
+    { label: "Unlock", icon: SVG.fingerprint.replace("<svg", '<svg class="fp_icon"'), onClick: () => void loadSecKey() },
+    { label: "Create", ghost: true, icon: SVG.plus.replace("<svg", '<svg class="plus_icon"'), onClick: () => void genNewPasskey() },
+  ]);
 }
 
 // ---- marching-ants dashed border on the drop zone (v1 createAnimatedBorder) ----
