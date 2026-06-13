@@ -37,7 +37,11 @@ const SVG = {
   check: `<svg viewBox="0 0 14 14"><path d="M5.28125 13.6611C4.90625 13.6611 4.58594 13.4945 4.32031 13.1611L0.273438 8.09863C0.174479 7.97884 0.101562 7.86165 0.0546875 7.74707C0.0130208 7.63249 -0.0078125 7.5153 -0.0078125 7.39551C-0.0078125 7.12467 0.0807292 6.90072 0.257812 6.72363C0.440104 6.54655 0.669271 6.45801 0.945312 6.45801C1.26302 6.45801 1.53125 6.60124 1.75 6.8877L5.25 11.3799L12.0312 0.606445C12.151 0.424154 12.2734 0.296549 12.3984 0.223633C12.5234 0.145508 12.6849 0.106445 12.8828 0.106445C13.1536 0.106445 13.375 0.192383 13.5469 0.364258C13.7188 0.530924 13.8047 0.749674 13.8047 1.02051C13.8047 1.12988 13.7865 1.24186 13.75 1.35645C13.7135 1.46582 13.6562 1.58301 13.5781 1.70801L6.23438 13.1533C6.00521 13.4919 5.6875 13.6611 5.28125 13.6611Z"/></svg>`,
   edit: `<svg viewBox="0 0 23.6475 23.3041"><rect height="23.3041" opacity="0" width="23.6475" x="0" y="0"/><path d="M15.5591 4.88935L6.08643 4.88935C5.10986 4.88935 4.56299 5.41669 4.56299 6.43232L4.56299 17.5163C4.56299 18.5319 5.10986 19.0495 6.08643 19.0495L17.2095 19.0495C18.186 19.0495 18.7231 18.5319 18.7231 17.5163L18.7231 8.12957L20.2954 6.55445L20.2954 17.5944C20.2954 19.6159 19.27 20.6218 17.229 20.6218L6.05713 20.6218C4.02588 20.6218 2.99072 19.6159 2.99072 17.5944L2.99072 6.34443C2.99072 4.33271 4.02588 3.31708 6.05713 3.31708L17.1313 3.31708Z"/><path d="M9.61182 14.2936L11.5161 13.4636L20.6372 4.35224L19.2993 3.03388L10.188 12.1452L9.30908 13.9811C9.23096 14.1472 9.42627 14.3718 9.61182 14.2936ZM21.3599 3.63935L22.063 2.91669C22.395 2.56513 22.395 2.09638 22.063 1.77412L21.8384 1.53974C21.5356 1.23701 21.0571 1.27607 20.7349 1.58857L20.022 2.29169Z"/></svg>`,
   outbound: `<svg viewBox="0 0 24 24" class="outbound_link"><path d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>`,
-  import: `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>`,
+  import: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>`,
+  // Contacts-footer actions. export = arrow up out of the tray (mirror of import); trash = Clear all.
+  // Stroke-based with currentColor so they follow the link color (and its hover light-up).
+  export: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M7.5 7.5 12 3m0 0 4.5 4.5M12 3v13.5"/></svg>`,
+  trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg>`,
   // "Show QR" toggle on the receive-a-file link. Filled QR glyph (three finder rings + a few modules);
   // fill-rule evenodd carves the ring holes; fill via currentColor so it follows the link color on hover.
   qr: `<svg viewBox="0 0 24 24" fill-rule="evenodd"><path d="M3 3h7v7h-7zm2 2h3v3h-3zM14 3h7v7h-7zm2 2h3v3h-3zM3 14h7v7h-7zm2 2h3v3h-3zM14 14h3v3h-3zM18.5 14h2.5v2.5h-2.5zM14 18.5h2.5v2.5h-2.5zM18.5 18.5h2.5v2.5h-2.5z"/></svg>`,
@@ -1025,20 +1029,21 @@ function renderContacts(container: HTMLElement) {
   }
   // footer: Add contact + Import (always); Export + Clear all (only when there are contacts).
   const footer = document.createElement("div"); footer.className = "contacts_footer";
-  const add = document.createElement("span"); add.className = "contacts_add no_select"; add.textContent = "Add";
-  add.addEventListener("click", () => openAddForm(container));
-  footer.appendChild(add);
-  const imp = document.createElement("span"); imp.className = "contacts_add no_select"; imp.textContent = "Import";
-  imp.addEventListener("click", () => importContacts(container));
-  footer.appendChild(imp);
+  const footAct = (cls: string, iconHtml: string, label: string, onClick: () => void) => {
+    const s = document.createElement("span"); s.className = `${cls} no_select`;
+    s.innerHTML = `${iconHtml}<span class="lbl">${esc(label)}</span>`;
+    s.addEventListener("click", onClick); return s;
+  };
+  footer.appendChild(footAct("contacts_add", SVG.plus.replace("<svg", '<svg class="ca_icon" fill="currentColor"'), "Add", () => openAddForm(container)));
+  footer.appendChild(footAct("contacts_add", SVG.import.replace("<svg", '<svg class="ca_icon"'), "Import", () => importContacts(container)));
   if (list.length) {
-    const exp = document.createElement("span"); exp.className = "contacts_add no_select"; exp.textContent = "Export";
-    exp.addEventListener("click", () => exportContacts());
-    footer.appendChild(exp);
-    const clear = document.createElement("span"); clear.className = "contacts_clear_link no_select"; clear.textContent = "Clear All";
+    footer.appendChild(footAct("contacts_add", SVG.export.replace("<svg", '<svg class="ca_icon"'), "Export", () => exportContacts()));
+    const clear = document.createElement("span"); clear.className = "contacts_clear_link no_select";
+    clear.innerHTML = `${SVG.trash.replace("<svg", '<svg class="ca_icon"')}<span class="lbl">Clear All</span>`;
+    const lbl = clear.querySelector(".lbl") as HTMLElement;
     let arming = false;
     clear.addEventListener("click", async () => {
-      if (!arming) { arming = true; clear.textContent = "Clear all contacts? Tap again to confirm"; setTimeout(() => { if (arming) { arming = false; clear.textContent = "Clear All"; } }, 3000); return; }
+      if (!arming) { arming = true; lbl.textContent = "Clear all contacts? Tap again to confirm"; setTimeout(() => { if (arming) { arming = false; lbl.textContent = "Clear All"; } }, 3000); return; }
       await Contacts.clearContacts(); renderContacts(container);
     });
     footer.appendChild(clear);
