@@ -125,7 +125,9 @@ a.cat { color: var(--link); font-weight: 600; }
 .md-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); line-height: 1.45; vertical-align: top; }
 .md-table tr:last-child td { border-bottom: none; }
 .md-table td:first-child { font-weight: 600; color: var(--head); }
-.md-note { display: flex; gap: 11px; border: 1px solid var(--soft-border); background: var(--soft-bg); border-radius: 10px; padding: 14px 16px; margin: 0 0 22px; }
+/* Callout = a quiet aside, not a card: blue left bar + neutral fill + square edge,
+   so it stays distinct from the rounded blue CTA card (which keeps the button). */
+.md-note { display: flex; gap: 11px; border-left: 3px solid var(--accent); background: var(--surface); border-radius: 0; padding: 14px 16px; margin: 0 0 22px; }
 .md-note-ic { flex: none; margin-top: 1px; color: var(--accent); display: inline-flex; }
 .md-note p:last-child { margin-bottom: 0; }
 .md-note p { font-size: 14px; line-height: 1.55; }
