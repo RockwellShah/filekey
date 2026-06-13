@@ -271,9 +271,9 @@ body.fk-authed #acct_control{display:flex;}
    ink. Color shift only (no background) so it works on links woven into a sentence and on icon+label
    actions alike. Icons follow via currentColor (.copy_icon/.confirm_icon/.edit_icon, .dl_action svg) or
    stroke:currentColor (.ext_icon). delete_act / contacts_clear_link keep their red hover (more specific). */
-.msg_clickable, .msg_link, .dl_action, .copy_button, .confirm_pub_key, .edit_pub_key, .cancel_pub_key, .nickname_btn, .nickname_skip, .contacts_add, #copy_pub{transition:color .12s ease;}
+.msg_clickable, .msg_link, .dl_action, .copy_button, .confirm_pub_key, .edit_pub_key, .cancel_pub_key, .nickname_btn, .nickname_skip, .contacts_add, .contact_act, #copy_pub{transition:color .12s ease;}
 .dl_action svg{fill:currentColor;}
-.msg_clickable:hover, .msg_link:hover, .dl_action:hover, .copy_button:hover, .confirm_pub_key:hover, .edit_pub_key:hover, .nickname_btn:hover, .contacts_add:hover, #copy_pub:hover{color:#4d9bff;}
+.msg_clickable:hover, .msg_link:hover, .dl_action:hover, .copy_button:hover, .confirm_pub_key:hover, .edit_pub_key:hover, .nickname_btn:hover, .contacts_add:hover, .contact_act:hover, #copy_pub:hover{color:#4d9bff;}
 .cancel_pub_key:hover, .nickname_skip:hover{color:#0d0d0d;}
 .msg_spacer{height:20px;}
 
@@ -439,7 +439,7 @@ html[data-theme="dark"] .contacts_add,
 html[data-theme="dark"] .nickname_btn,
 html[data-theme="dark"] .copy_button,
 html[data-theme="dark"] .edit_pub_key{color:#4d9bff;}
-html[data-theme="dark"] .msg_clickable:hover,html[data-theme="dark"] .msg_link:hover,html[data-theme="dark"] .dl_action:hover,html[data-theme="dark"] .copy_button:hover,html[data-theme="dark"] .confirm_pub_key:hover,html[data-theme="dark"] .edit_pub_key:hover,html[data-theme="dark"] .nickname_btn:hover,html[data-theme="dark"] .contacts_add:hover,html[data-theme="dark"] #copy_pub:hover{color:#7db4ff;}
+html[data-theme="dark"] .msg_clickable:hover,html[data-theme="dark"] .msg_link:hover,html[data-theme="dark"] .dl_action:hover,html[data-theme="dark"] .copy_button:hover,html[data-theme="dark"] .confirm_pub_key:hover,html[data-theme="dark"] .edit_pub_key:hover,html[data-theme="dark"] .nickname_btn:hover,html[data-theme="dark"] .contacts_add:hover,html[data-theme="dark"] .contact_act:hover,html[data-theme="dark"] #copy_pub:hover{color:#7db4ff;}
 html[data-theme="dark"] .cancel_pub_key:hover,html[data-theme="dark"] .nickname_skip:hover{color:#f2f2f5;}
 html[data-theme="dark"] .pub_key_textarea,
 html[data-theme="dark"] .nickname_input{background:#161618;color:#f2f2f5;border-color:#ffffff1f;}
