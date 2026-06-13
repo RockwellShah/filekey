@@ -148,7 +148,7 @@ body{margin:0;}
 .auth_btn.dc_btn_primary:hover .fp_icon{transform:scale(1.12);}
 .auth_btn.dc_btn_ghost:hover{transform:translateY(-1px);box-shadow:0 4px 12px #00000012;}
 .auth_btn.dc_btn_ghost:hover .plus_icon{transform:rotate(90deg);}
-@media (prefers-reduced-motion:reduce){.dc_btn,.auth_btn svg{transition:none;}.auth_btn:hover{transform:none;}}
+@media (prefers-reduced-motion:reduce){.dc_btn,.auth_btn svg{transition:none;}.auth_btn.dc_btn_primary:hover,.auth_btn.dc_btn_ghost:hover,.auth_btn.dc_btn_primary:hover .fp_icon,.auth_btn.dc_btn_ghost:hover .plus_icon{transform:none;}}
 
 
 #file_input{display:none;}
@@ -364,7 +364,7 @@ body.fk-authed #acct_control{display:flex;}
 	.dc_txt_container{flex-basis:100%;text-align:center;}
 	.dc_txt_container .file_title{white-space:nowrap;font-size:clamp(11px,3.6vw,15px);}
 	.dc_buttons{flex-basis:100%;gap:10px;}
-	.dc_btn{flex:1;}
+	#drop_container .dc_btn{flex:1;}
 }
 
 
