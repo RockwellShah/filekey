@@ -42,6 +42,8 @@ const SVG = {
   // Stroke-based with currentColor so they follow the link color (and its hover light-up).
   export: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M7.5 7.5 12 3m0 0 4.5 4.5M12 3v13.5"/></svg>`,
   trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg>`,
+  // Cancel's "✗", the counterpart to Confirm's check — only used where a text Cancel sits beside an iconed Confirm.
+  close: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 5 19 19M19 5 5 19"/></svg>`,
   // "Show QR" toggle on the receive-a-file link. Filled QR glyph (three finder rings + a few modules);
   // fill-rule evenodd carves the ring holes; fill via currentColor so it follows the link color on hover.
   qr: `<svg viewBox="0 0 24 24" fill-rule="evenodd"><path d="M3 3h7v7h-7zm2 2h3v3h-3zM14 3h7v7h-7zm2 2h3v3h-3zM3 14h7v7h-7zm2 2h3v3h-3zM14 14h3v3h-3zM18.5 14h2.5v2.5h-2.5zM14 18.5h2.5v2.5h-2.5zM18.5 18.5h2.5v2.5h-2.5z"/></svg>`,
@@ -737,7 +739,7 @@ async function openRecipientPrompt(file: ShareFile) {
   mainInner.appendChild(picker);
   // v1 html_newTextarea: right-aligned, auto-growing, Confirm (check) + Edit (pencil, hidden).
   const tmp = document.createElement("div");
-  tmp.innerHTML = `<div class="pub_key_textarea_cont set_right"><textarea class="pub_key_textarea" placeholder="Enter recipient's share key" rows="1" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off"></textarea><div class="pub_key_actions"><span class="confirm_pub_key no_select">${SVG.check.replace("<svg", '<svg class="confirm_icon"')} <span>Confirm</span></span><span class="cancel_pub_key no_select">Cancel</span><span class="edit_pub_key no_select">${SVG.edit.replace("<svg", '<svg class="edit_icon"')} <span>Edit</span></span></div></div>`;
+  tmp.innerHTML = `<div class="pub_key_textarea_cont set_right"><textarea class="pub_key_textarea" placeholder="Enter recipient's share key" rows="1" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off"></textarea><div class="pub_key_actions"><span class="confirm_pub_key no_select">${SVG.check.replace("<svg", '<svg class="confirm_icon"')} <span>Confirm</span></span><span class="cancel_pub_key no_select">${SVG.close.replace("<svg", '<svg class="cancel_icon"')} <span>Cancel</span></span><span class="edit_pub_key no_select">${SVG.edit.replace("<svg", '<svg class="edit_icon"')} <span>Edit</span></span></div></div>`;
   const cont = tmp.firstElementChild as HTMLElement;
   mainInner.appendChild(cont);
   const ta = cont.querySelector(".pub_key_textarea") as HTMLTextAreaElement;
@@ -1088,7 +1090,7 @@ function openAddForm(container: HTMLElement) {
   container.querySelector(".contacts_footer")?.remove();
   container.querySelector(".add_contact_form")?.remove();
   const form = document.createElement("div"); form.className = "add_contact_form";
-  form.innerHTML = `<textarea class="pub_key_textarea add_key_input" placeholder="Paste the recipient's share key" rows="1" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off"></textarea><input class="nickname_input add_nick_input" type="text" placeholder="Nickname (optional)" maxlength="40" autocomplete="off"><div class="pub_key_actions"><span class="confirm_pub_key no_select add_save">${SVG.check.replace("<svg", '<svg class="confirm_icon"')} <span>Save</span></span><span class="cancel_pub_key no_select add_cancel">Cancel</span></div>`;
+  form.innerHTML = `<textarea class="pub_key_textarea add_key_input" placeholder="Paste the recipient's share key" rows="1" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off"></textarea><input class="nickname_input add_nick_input" type="text" placeholder="Nickname (optional)" maxlength="40" autocomplete="off"><div class="pub_key_actions"><span class="confirm_pub_key no_select add_save">${SVG.check.replace("<svg", '<svg class="confirm_icon"')} <span>Save</span></span><span class="cancel_pub_key no_select add_cancel">${SVG.close.replace("<svg", '<svg class="cancel_icon"')} <span>Cancel</span></span></div>`;
   container.appendChild(form);
   const keyInput = form.querySelector(".add_key_input") as HTMLTextAreaElement;
   const nickInput = form.querySelector(".add_nick_input") as HTMLInputElement;
