@@ -84,7 +84,10 @@ function mdToHtml(md: string): string {
       while (i < lines.length && /^\d+\.\s+/.test(lines[i])) { items.push(inline(lines[i].replace(/^\d+\.\s+/, ""))); i++; }
       out.push('<ol class="md-ol">' + items.map((it) => "<li>" + it + "</li>").join("") + "</ol>"); continue;
     }
-    const buf: string[] = [];
+    // Consume the current line unconditionally so the loop always advances. A line
+    // that starts with "|" but isn't a valid table is a block-start with no handler;
+    // without this seed, i would never advance and the build would hang.
+    const buf: string[] = [lines[i]]; i++;
     while (i < lines.length && !/^\s*$/.test(lines[i]) && !isBlockStart(lines[i])) { buf.push(lines[i]); i++; }
     out.push("<p>" + inline(buf.join(" ")) + "</p>");
   }
@@ -107,6 +110,10 @@ function parse(raw: string): { meta: Record<string, string>; body: string } {
 function fmtDate(iso: string): string { const [y, mo, d] = iso.split("-").map(Number); return MONTHS[mo - 1] + " " + d + ", " + y; }
 function rfc822(iso: string): string { return new Date(iso + "T12:00:00Z").toUTCString(); }
 function readMin(body: string): number { const w = body.trim().split(/\s+/).filter(Boolean).length; return Math.max(1, Math.round(w / 200)); }
+// Reduce a frontmatter slug/path segment to a safe clean-URL token: lowercase
+// alphanumerics and hyphens only. Neutralizes "../", quotes, and anything else
+// that could escape the output directory or inject into href/XML/sitemap.
+function slugify(s: string): string { return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "post"; }
 
 type Post = { slug: string; title: string; description: string; date: string; dateFmt: string; cat: typeof CATEGORIES[number]; author: string; html: string; readMin: number; url: string; next?: Post };
 type Page = { title: string; description: string; path: string; html: string };
@@ -168,10 +175,10 @@ const pages: Page[] = [];
 for (const f of files) {
   const { meta, body } = parse(readFileSync(join(blogSrc, f), "utf8"));
   const html = mdToHtml(body);
-  if (meta.path) { pages.push({ title: meta.title || "", description: meta.description || "", path: meta.path, html }); continue; }
+  if (meta.path) { const safePath = "/" + meta.path.replace(/^\/+/, "").split("/").map(slugify).filter(Boolean).join("/"); pages.push({ title: meta.title || "", description: meta.description || "", path: safePath, html }); continue; }
   const cat = catBySingular(meta.category || "");
   if (!cat) { console.warn("skip " + f + " (unknown category: " + meta.category + ")"); continue; }
-  const slug = (meta.slug || f.replace(/^\d{4}-\d{2}-\d{2}-/, "").replace(/\.md$/, "")).trim();
+  const slug = slugify(meta.slug || f.replace(/^\d{4}-\d{2}-\d{2}-/, "").replace(/\.md$/, ""));
   posts.push({ slug, title: meta.title || slug, description: meta.description || "", date: meta.date || "1970-01-01", dateFmt: fmtDate(meta.date || "1970-01-01"), cat, author: meta.author || "FileKey.app", html, readMin: readMin(body), url: "/blog/" + slug + "/" });
 }
 posts.sort((a, b) => (a.date < b.date ? 1 : -1));
