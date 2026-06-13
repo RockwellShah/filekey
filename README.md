@@ -9,13 +9,23 @@ FileKey is an offline web app that lets you quickly encrypt and share files usin
 ### 🚀 Features
 
 - ✅ **Free & Open Source** – Licensed under GPLv3.
-- ✅ **Accountless** – No logins, no tracking, no cloud.
+- ✅ **Accountless** – No logins, no tracking.
 - ✅ **Passkey-Based Encryption** – Uses your existing passkey, password manager, or hardware security key.
 - ✅ **No Cloud** – Files are sealed with AES-256 on your device. Nothing is ever uploaded.
 - ✅ **Secure Sharing** – Encrypt a file to someone's Share Key, or post a "send me a file" link.
 - ✅ **Recovery Codes** – Optional offline recovery codes so you're never locked out.
 - ✅ **Folders & Large Files** – Encrypt whole folders, and stream multi-gigabyte files easily.
 - ✅ **Offline** – Runs 100% in your browser, online or offline. Installable as a PWA.
+
+---
+
+### 🗣️ What People Say 
+
+- French cybersecurity blogger Korben wrote a nice [breakdown of FileKey](https://korben.info/filekey-chiffrement-fichiers-passkeys-local-opensource.html).
+- Tom Dörr's [X thread](https://x.com/tom_doerr/status/1921957643444273491?s=20). (40k+ views)
+- Launch Post on [Reddit](https://www.reddit.com/r/yubikey/comments/1iiptny/introducing_filekey_encrypt_decrypt_files_using/). (100k+ views)
+- Sharing Feature Launch on [Reddit](https://www.reddit.com/r/yubikey/comments/1jbbvwd/update_filekey_encrypt_share_files_using/) (45k+ views)
+- PrivacyGuide [Discussion](https://discuss.privacyguides.net/t/filekey-passkey-file-encryption/26326/3)
 
 ---
 
@@ -144,12 +154,6 @@ The build output is plain static files. Host them on any static host or your own
 ### 📦 Older Files
 
 FileKey 1.1 uses a new, standards-based format and cannot open files made by the original FileKey. Old files still open at **[v1.filekey.app](https://v1.filekey.app)** with the same passkey, and FileKey links you there automatically when it detects one. The original v1 source lives on the [`v1` branch](../../tree/v1).
-
----
-
-### 📝 Review
-
-French cybersecurity blogger Korben wrote a nice [breakdown of FileKey](https://korben.info/filekey-chiffrement-fichiers-passkeys-local-opensource.html).
 
 ---
 
