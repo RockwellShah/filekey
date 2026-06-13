@@ -40,9 +40,12 @@ self.addEventListener("fetch", (event) => {
       .catch(() =>
         caches.match(req).then((cached) => {
           if (cached) return cached;
-          // Offline and uncached: substitute the app shell only for a navigation (the SPA entry point).
-          // For a missed sub-resource, return a real 504 rather than passing index.html off as that asset.
-          if (req.mode === "navigate") return caches.match("/index.html");
+          // Offline and uncached: substitute the app shell only for an app navigation (the SPA entry point).
+          // The blog and policy pages are their own documents, not the app shell, so don't pass index.html
+          // off as them. For a missed sub-resource, return a real 504 rather than the wrong page.
+          const path = new URL(req.url).pathname;
+          const isAppRoute = !/^\/(blog|privacy|terms|license)(\/|$)/.test(path);
+          if (req.mode === "navigate" && isAppRoute) return caches.match("/index.html");
           return new Response("offline", { status: 504, statusText: "Offline" });
         }),
       ),

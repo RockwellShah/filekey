@@ -2,6 +2,12 @@ node_modules/
 web/dist/
 web/source.txt
 web/recover.html
+web/blog/
+web/sitemap.xml
+web/feed.xml
+web/privacy/
+web/terms/
+web/license/
 *.log
 .DS_Store
 .gstack/

@@ -7,3 +7,10 @@ node_modules/
 reference/web/dist/
 reference/web/source.txt
 reference/web/recover.html
+reference/web/blog/
+reference/web/sitemap.xml
+reference/web/feed.xml
+reference/web/privacy/
+reference/web/terms/
+reference/web/license/
+.gstack/
