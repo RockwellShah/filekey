@@ -80,14 +80,6 @@ body{margin:0;}
 .confirm_pub_key, .edit_pub_key, .copy_button{cursor:pointer;color: #1377F9;font-weight: 500;display:flex;align-items:center;line-height:1;}
 .cancel_pub_key{cursor:pointer;color:#00000080;font-weight:500;line-height:1;display:flex;align-items:center;}
 .edit_pub_key{display:none;}
-/* Hover life on the inline action chips (Copy / Confirm / Cancel / Edit, and the action-row choices that
-   reuse these classes): a defined pill on hover (faint fill + outline, the same cue as .contact_chip).
-   Padding + a transparent resting border are baked in so there's no jump on hover; width:fit-content keeps
-   the pill tight; copy_button gets a negative margin so its new left padding still aligns with the text. */
-.confirm_pub_key, .cancel_pub_key, .edit_pub_key, .copy_button{width:fit-content;padding:6px 10px;border:1px solid transparent;border-radius:8px;transition:background .12s ease, border-color .12s ease;}
-.copy_button{margin-left:-11px;}
-.confirm_pub_key:hover, .edit_pub_key:hover, .copy_button:hover{background:#1377f91a;border-color:#1377f955;}
-.cancel_pub_key:hover{background:#0000000d;border-color:#00000026;}
 
 .pub_key_textarea_cont{width:50%;}
 
@@ -197,7 +189,7 @@ body{margin:0;}
 .plus_icon{width:28px;height:27px;fill:#1377F9;}
 .import_icon{width:28px;height:28px;fill:none;stroke:#c8c8ce;stroke-width:1.8;}
 .dl_icon{width:19px;height:19px;fill:#1377F9;margin-right:4px;}
-.confirm_icon, .edit_icon, .copy_icon{width:18px;height:19px;fill:#1377F9;margin-right:4px;}
+.confirm_icon, .edit_icon, .copy_icon{width:18px;height:19px;fill:currentColor;margin-right:4px;}
 .confirm_icon{padding:2px;}
 .copy_icon{padding:1px;}
 .edit_icon{padding:0;}
@@ -275,13 +267,14 @@ body.fk-authed #acct_control{display:flex;}
 .msg_bullet_point{position:absolute;left:15px;font-size:20px;}
 
 .msg_link{text-decoration:none;}
-/* Hover "light up" for the inline actions that aren't chips: the download-card Share/Save (.dl_action),
-   and the receive-link Copy/Share/Show QR + inline links like "Show it" / Signal / Substack (.msg_clickable
-   / .msg_link). Color shift only (no background) so it works on links woven into a sentence. The .dl_action
-   icons follow via currentColor; .ext_icon already uses stroke:currentColor. */
-.msg_clickable, .msg_link, .dl_action{transition:color .12s ease;}
+/* Unified hover "light up" for EVERY inline text/link action: blue ones brighten, gray ones deepen toward
+   ink. Color shift only (no background) so it works on links woven into a sentence and on icon+label
+   actions alike. Icons follow via currentColor (.copy_icon/.confirm_icon/.edit_icon, .dl_action svg) or
+   stroke:currentColor (.ext_icon). delete_act / contacts_clear_link keep their red hover (more specific). */
+.msg_clickable, .msg_link, .dl_action, .copy_button, .confirm_pub_key, .edit_pub_key, .cancel_pub_key, .nickname_btn, .nickname_skip, .contacts_add, #copy_pub{transition:color .12s ease;}
 .dl_action svg{fill:currentColor;}
-.msg_clickable:hover, .msg_link:hover, .dl_action:hover{color:#4d9bff;}
+.msg_clickable:hover, .msg_link:hover, .dl_action:hover, .copy_button:hover, .confirm_pub_key:hover, .edit_pub_key:hover, .nickname_btn:hover, .contacts_add:hover, #copy_pub:hover{color:#4d9bff;}
+.cancel_pub_key:hover, .nickname_skip:hover{color:#0d0d0d;}
 .msg_spacer{height:20px;}
 
 
@@ -431,8 +424,6 @@ html[data-theme="dark"] .contact_key,
 html[data-theme="dark"] .contact_act.delete_act{color:#ffffff66;}
 html[data-theme="dark"] .contacts_clear_link:hover,
 html[data-theme="dark"] .contact_act.delete_act:hover{color:#ff5a52;}
-html[data-theme="dark"] .confirm_pub_key:hover, html[data-theme="dark"] .edit_pub_key:hover, html[data-theme="dark"] .copy_button:hover{background:#1377f933;border-color:#1377f988;}
-html[data-theme="dark"] .cancel_pub_key:hover{background:#ffffff14;border-color:#ffffff33;}
 html[data-theme="dark"] .std_uploaded{background:#1f1f23;color:#f2f2f5;}
 html[data-theme="dark"] .std_download{background:#161618;border-color:#ffffff1f;color:#f2f2f5;}
 html[data-theme="dark"] .icon_container,
@@ -445,8 +436,11 @@ html[data-theme="dark"] .confirm_pub_key,
 html[data-theme="dark"] #copy_pub,
 html[data-theme="dark"] .contact_act,
 html[data-theme="dark"] .contacts_add,
-html[data-theme="dark"] .nickname_btn{color:#4d9bff;}
-html[data-theme="dark"] .msg_clickable:hover,html[data-theme="dark"] .msg_link:hover,html[data-theme="dark"] .dl_action:hover{color:#7db4ff;}
+html[data-theme="dark"] .nickname_btn,
+html[data-theme="dark"] .copy_button,
+html[data-theme="dark"] .edit_pub_key{color:#4d9bff;}
+html[data-theme="dark"] .msg_clickable:hover,html[data-theme="dark"] .msg_link:hover,html[data-theme="dark"] .dl_action:hover,html[data-theme="dark"] .copy_button:hover,html[data-theme="dark"] .confirm_pub_key:hover,html[data-theme="dark"] .edit_pub_key:hover,html[data-theme="dark"] .nickname_btn:hover,html[data-theme="dark"] .contacts_add:hover,html[data-theme="dark"] #copy_pub:hover{color:#7db4ff;}
+html[data-theme="dark"] .cancel_pub_key:hover,html[data-theme="dark"] .nickname_skip:hover{color:#f2f2f5;}
 html[data-theme="dark"] .pub_key_textarea,
 html[data-theme="dark"] .nickname_input{background:#161618;color:#f2f2f5;border-color:#ffffff1f;}
 html[data-theme="dark"] .contact_chip{background:#1f1f23;border-color:#ffffff1f;color:#f2f2f5;}

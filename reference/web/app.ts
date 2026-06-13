@@ -988,7 +988,7 @@ async function revealRecovery() {
   // Pair the code with the offline recovery tool (web/recover.html) — a download, not a nav link.
   const tool = document.createElement("p");
   tool.style.cssText = "margin:18px 0 0;font-size:14px;color:var(--fk-muted-2);line-height:1.55";
-  tool.innerHTML = `Even if FileKey disappears, this code still works. Pair it with the <a href="/recover.html" download="filekey-offline-recovery.html" style="color:var(--fk-link);font-weight:500;text-decoration:none;white-space:nowrap">${SVG.save.replace("<svg", '<svg style="width:12px;height:14px;fill:#1377F9;vertical-align:-2px;margin-right:3px"')}offline recovery tool</a>, a single self-contained page that decrypts your files locally.`;
+  tool.innerHTML = `Even if FileKey disappears, this code still works. Pair it with the <a class="msg_link" href="/recover.html" download="filekey-offline-recovery.html" style="font-weight:500;white-space:nowrap">${SVG.save.replace("<svg", '<svg style="width:12px;height:14px;fill:currentColor;vertical-align:-2px;margin-right:3px"')}offline recovery tool</a>, a single self-contained page that decrypts your files locally.`;
   msg.appendChild(tool);
   scrollToBottom();
   copy.addEventListener("click", async () => { try { await navigator.clipboard.writeText(bip39); const l = copy.querySelector(".cp_lbl")!; l.textContent = "Copied!"; setTimeout(() => (l.textContent = "Copy"), 1000); } catch {} });
