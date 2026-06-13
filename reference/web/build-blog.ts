@@ -146,7 +146,7 @@ function layout(o: { title: string; description: string; canonical: string; ogTy
     '<link rel="canonical" href="' + o.canonical + '">\n' +
     '<link rel="icon" href="/logo.svg" type="image/svg+xml">\n' +
     '<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">\n' +
-    '<meta name="theme-color" content="#161618" media="(prefers-color-scheme: dark)">\n' +
+    '<meta name="theme-color" content="#0c0c0e" media="(prefers-color-scheme: dark)">\n' +
     '<meta property="og:type" content="' + (o.ogType || "website") + '">\n' +
     '<meta property="og:site_name" content="FileKey">\n' +
     '<meta property="og:title" content="' + esc(o.ogTitle || o.title) + '">\n' +
