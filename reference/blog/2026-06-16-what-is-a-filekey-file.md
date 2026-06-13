@@ -3,7 +3,7 @@ title: What is a .filekey file?
 description: A .filekey file is an end-to-end encrypted file made with FileKey. Open it free in your browser with a passkey. No account, nothing to install.
 date: 2026-06-16
 category: Guide
-author: Rockwell Shah
+author: FileKey.app
 ---
 
 A `.filekey` file is an encrypted file made with FileKey. If someone sent you one, they chose you: it is locked so that only you can open it. Opening it is free, takes about a minute, and happens entirely on your device. A file ending in `.shared.filekey` is the same thing, encrypted for sharing.

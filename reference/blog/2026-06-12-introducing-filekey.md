@@ -3,7 +3,7 @@ title: Introducing FileKey
 description: Why we built a file encryption tool with no accounts, no passwords, and no server, and why it's a static page on purpose.
 date: 2026-06-12
 category: News
-author: Rockwell Shah
+author: FileKey.app
 ---
 
 Most of us send sensitive files the same way we send everything else: as an email or chat attachment. The trouble is that those files can be read by every server and backup they pass through. FileKey is a free, open source tool that fixes this. It encrypts a file so that only one specific person can open it, using the passkey you already have.

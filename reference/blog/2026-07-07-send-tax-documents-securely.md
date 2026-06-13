@@ -3,7 +3,7 @@ title: How to send tax documents securely
 description: Your accountant wants your W-2. Email is the worst way to send it. Three safer options, ranked by effort and by what they actually protect you from.
 date: 2026-07-07
 category: Guide
-author: Rockwell Shah
+author: FileKey.app
 ---
 
 It's tax season. Your accountant needs your W-2, a few 1099s, maybe a passport scan. The default move is to attach them to an email, and it's the worst option available. Here's why, and three safer ways ranked by effort.

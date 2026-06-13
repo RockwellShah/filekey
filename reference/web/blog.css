@@ -42,7 +42,10 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
 }
-.wrap { max-width: 640px; margin: 0 auto; padding: 0 28px; }
+.wrap { max-width: 720px; margin: 0 auto; padding: 0 28px; }
+/* Header and footer frame a wider span than the reading column, so on wide
+   screens the chrome anchors toward the page edges instead of floating. */
+.hd-in, .ft-in { max-width: 1120px; }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
@@ -86,6 +89,9 @@ a:hover { text-decoration: underline; }
 .meta .cat { color: var(--accent); font-weight: 600; }
 a.cat { color: var(--accent); font-weight: 600; }
 .empty { color: var(--muted); padding: 24px 0; }
+/* On category pages the chips are directly followed by the first post; drop that
+   item's top divider so the separator line doesn't crowd the pills. */
+.chips + .item { border-top: none; padding-top: 22px; }
 
 /* CTA card */
 .cta { margin: 30px 0 34px; display: flex; align-items: center; gap: 16px; background: var(--soft-bg); border: 1px solid var(--soft-border); border-radius: 12px; padding: 18px 20px; }
@@ -95,6 +101,7 @@ a.cat { color: var(--accent); font-weight: 600; }
 
 /* Article */
 .art { padding-top: 32px; }
+.art.page { padding-bottom: 40px; }
 .art h1 { margin: 0 0 10px; font-size: 30px; font-weight: 600; letter-spacing: -.018em; line-height: 1.22; color: var(--head); }
 .byline { font-size: 14px; color: var(--muted); margin: 0 0 24px; }
 .md-body { font-size: 15.5px; line-height: 1.65; color: var(--body); }

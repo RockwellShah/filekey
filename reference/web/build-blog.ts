@@ -14,14 +14,12 @@ const blogOut = join(webDir, "blog");
 const SITE = "https://filekey.app";
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-// Show the category chip row only once the blog has enough posts to fill the drawers.
-const CHIP_THRESHOLD = 8;
-
 const CATEGORIES = [
   { key: "guides", singular: "Guide", label: "Guides", blurb: "Practical walkthroughs for sending sensitive things safely." },
   { key: "comparisons", singular: "Comparison", label: "Comparisons", blurb: "How FileKey compares to the usual ways people send files." },
   { key: "deep-dives", singular: "Deep dive", label: "Deep dives", blurb: "The engineering and cryptography under the hood." },
-  { key: "news", singular: "News", label: "News", blurb: "Releases and announcements." },
+  { key: "news", singular: "News", label: "News", blurb: "Announcements and what we're building." },
+  { key: "updates", singular: "Update", label: "Updates", blurb: "Release notes and what's new in each version." },
 ];
 const catBySingular = (s: string) => CATEGORIES.find((c) => c.singular.toLowerCase() === s.toLowerCase());
 
@@ -126,7 +124,7 @@ function header(): string {
   return '<header class="hd"><div class="wrap hd-in"><a class="brand" href="/blog/"><svg class="mk" width="17" height="21" viewBox="0 0 22 27" aria-hidden="true">' + MARK + '</svg><span class="wm">FileKey</span><span class="badge">Blog</span></a><div class="hd-right"><button class="theme-btn" type="button" id="themeBtn" aria-label="Switch theme">' + SUN + '</button><a class="btn" href="/">Open FileKey</a></div></div></header>';
 }
 function footer(): string {
-  return '<footer class="ft"><div class="wrap ft-in"><nav class="ft-links"><a href="/">Open app</a><a href="/feed.xml">RSS</a><a href="/license/">License</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav><p class="ft-note">No trackers, no cookies, no analytics. The only script on this page is the theme switch.</p><p class="ft-copy">&copy; 2026 FileKey</p></div></footer>';
+  return '<footer class="ft"><div class="wrap ft-in"><nav class="ft-links"><a href="/">Home</a><a href="/terms/">Terms</a><a href="/privacy/">Privacy</a><a href="/license/">License</a><a href="mailto:contact@filekey.app">Contact</a></nav><p class="ft-note">No trackers, no cookies, no analytics.</p><p class="ft-copy">&copy; 2026 FileKey</p></div></footer>';
 }
 function layout(o: { title: string; description: string; canonical: string; ogType?: string; ogTitle?: string; main: string }): string {
   return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
@@ -168,13 +166,15 @@ for (const f of files) {
   const cat = catBySingular(meta.category || "");
   if (!cat) { console.warn("skip " + f + " (unknown category: " + meta.category + ")"); continue; }
   const slug = (meta.slug || f.replace(/^\d{4}-\d{2}-\d{2}-/, "").replace(/\.md$/, "")).trim();
-  posts.push({ slug, title: meta.title || slug, description: meta.description || "", date: meta.date || "1970-01-01", dateFmt: fmtDate(meta.date || "1970-01-01"), cat, author: meta.author || "", html, readMin: readMin(body), url: "/blog/" + slug + "/" });
+  posts.push({ slug, title: meta.title || slug, description: meta.description || "", date: meta.date || "1970-01-01", dateFmt: fmtDate(meta.date || "1970-01-01"), cat, author: meta.author || "FileKey.app", html, readMin: readMin(body), url: "/blog/" + slug + "/" });
 }
 posts.sort((a, b) => (a.date < b.date ? 1 : -1));
 posts.forEach((p, i) => { if (posts.length > 1) p.next = posts[(i + 1) % posts.length]; });
 
 const usedCats = CATEGORIES.filter((c) => posts.some((p) => p.cat.key === c.key));
-const showChips = posts.length >= CHIP_THRESHOLD;
+// Show the chip row once at least two categories have posts. Chips render only
+// populated categories (see usedCats), so there are never empty drawers.
+const showChips = usedCats.length >= 2;
 
 // Home
 const [feat, ...rest] = posts;
@@ -206,7 +206,7 @@ for (const p of posts) {
 
 // Standalone pages (privacy, terms, license)
 for (const pg of pages) {
-  const main = '<article class="art"><h1>' + esc(pg.title) + '</h1><div class="md-body">' + pg.html + "</div></article>";
+  const main = '<article class="art page"><h1>' + esc(pg.title) + '</h1><div class="md-body">' + pg.html + "</div></article>";
   write(join(webDir, pg.path.replace(/^\//, ""), "index.html"), layout({ title: pg.title + " &middot; FileKey", description: pg.description, canonical: SITE + pg.path + "/", main }));
 }
 
