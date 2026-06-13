@@ -1137,11 +1137,11 @@ function initChiz() {
   $("chiz_contacts").addEventListener("click", () => { close(); void showContacts(); });
   $("chiz_recovery").addEventListener("click", () => { close(); void showRecovery(); });
   // Appearance: Light / Dark / Auto. "auto" follows the OS (prefers-color-scheme) and updates live.
-  // Default (nothing saved) is light. Choice persists; the menu stays open so the change is visible.
+  // Default (nothing saved) is auto, following the OS. Choice persists; the menu stays open so the change is visible.
   const themeMql = window.matchMedia("(prefers-color-scheme: dark)");
   // In-memory mode is the source of truth (seeded from storage); persistence is best-effort, so
   // Auto keeps following the OS live even if localStorage writes are blocked (private mode etc.).
-  let themeMode = ((): string => { try { return localStorage.getItem("filekey-theme") || "light"; } catch { return "light"; } })();
+  let themeMode = ((): string => { try { return localStorage.getItem("filekey-theme") || "auto"; } catch { return "auto"; } })();
   const themeOpts = Array.from(document.querySelectorAll<HTMLElement>(".theme_opt"));
   const resolveTheme = (mode: string): "light" | "dark" =>
     mode === "dark" || (mode === "auto" && themeMql.matches) ? "dark" : "light";
