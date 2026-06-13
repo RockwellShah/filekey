@@ -311,9 +311,12 @@ async function saveBlob(blob: Blob, filename: string) {
     }
   }
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click();
-  // An <a download> has no completion callback and (usually) no cancel dialog: the file just lands in
-  // Downloads. So confirm where it went; for a big file, also warn not to close the tab mid-flush.
-  void appMsg([big ? "Your download is in progress. Keep this tab open until it finishes." : "Saved to your downloads."], { speed: 6 });
+  // An <a download> hands the blob to the browser's own download manager — there's no completion callback,
+  // so we can't show "done" (the browser's download UI does). Frame it as a local save, not a network
+  // transfer, and for a big file note that closing the tab early can interrupt the browser writing the blob.
+  void appMsg([big
+    ? "Your browser is saving the encrypted file to your downloads (nothing leaves your device). It's a large file, so keep this tab open until your browser shows the download finished."
+    : "Saved to your downloads."], { speed: 6 });
   // Keep the URL valid long enough for the download to flush — scale ~1s/MB (60s floor, 10min cap);
   // freed on tab close regardless. (Chrome's native picker path above doesn't reach here.)
   const ttl = Math.min(600_000, Math.max(60_000, Math.ceil(blob.size / (1024 * 1024)) * 1000));
