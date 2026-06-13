@@ -275,6 +275,13 @@ body.fk-authed #acct_control{display:flex;}
 .msg_bullet_point{position:absolute;left:15px;font-size:20px;}
 
 .msg_link{text-decoration:none;}
+/* Hover "light up" for the inline actions that aren't chips: the download-card Share/Save (.dl_action),
+   and the receive-link Copy/Share/Show QR + inline links like "Show it" / Signal / Substack (.msg_clickable
+   / .msg_link). Color shift only (no background) so it works on links woven into a sentence. The .dl_action
+   icons follow via currentColor; .ext_icon already uses stroke:currentColor. */
+.msg_clickable, .msg_link, .dl_action{transition:color .12s ease;}
+.dl_action svg{fill:currentColor;}
+.msg_clickable:hover, .msg_link:hover, .dl_action:hover{color:#4d9bff;}
 .msg_spacer{height:20px;}
 
 
@@ -439,6 +446,7 @@ html[data-theme="dark"] #copy_pub,
 html[data-theme="dark"] .contact_act,
 html[data-theme="dark"] .contacts_add,
 html[data-theme="dark"] .nickname_btn{color:#4d9bff;}
+html[data-theme="dark"] .msg_clickable:hover,html[data-theme="dark"] .msg_link:hover,html[data-theme="dark"] .dl_action:hover{color:#7db4ff;}
 html[data-theme="dark"] .pub_key_textarea,
 html[data-theme="dark"] .nickname_input{background:#161618;color:#f2f2f5;border-color:#ffffff1f;}
 html[data-theme="dark"] .contact_chip{background:#1f1f23;border-color:#ffffff1f;color:#f2f2f5;}
