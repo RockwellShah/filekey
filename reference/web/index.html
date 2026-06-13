@@ -81,11 +81,13 @@ body{margin:0;}
 .cancel_pub_key{cursor:pointer;color:#00000080;font-weight:500;line-height:1;display:flex;align-items:center;}
 .edit_pub_key{display:none;}
 /* Hover life on the inline action chips (Copy / Confirm / Cancel / Edit, and the action-row choices that
-   reuse these classes): a faint rounded highlight. box-shadow spread (not padding) so layout never shifts;
-   width:fit-content keeps the pill tight around the icon+label even when the chip is a full-width block. */
-.confirm_pub_key, .cancel_pub_key, .edit_pub_key, .copy_button{border-radius:7px;width:fit-content;transition:background .15s ease, box-shadow .15s ease;}
-.confirm_pub_key:hover, .edit_pub_key:hover, .copy_button:hover{background:#1377f91a;box-shadow:0 0 0 6px #1377f91a;}
-.cancel_pub_key:hover{background:#00000012;box-shadow:0 0 0 6px #00000012;}
+   reuse these classes): a defined pill on hover (faint fill + outline, the same cue as .contact_chip).
+   Padding + a transparent resting border are baked in so there's no jump on hover; width:fit-content keeps
+   the pill tight; copy_button gets a negative margin so its new left padding still aligns with the text. */
+.confirm_pub_key, .cancel_pub_key, .edit_pub_key, .copy_button{width:fit-content;padding:6px 10px;border:1px solid transparent;border-radius:8px;transition:background .12s ease, border-color .12s ease;}
+.copy_button{margin-left:-11px;}
+.confirm_pub_key:hover, .edit_pub_key:hover, .copy_button:hover{background:#1377f91a;border-color:#1377f955;}
+.cancel_pub_key:hover{background:#0000000d;border-color:#00000026;}
 
 .pub_key_textarea_cont{width:50%;}
 
@@ -422,8 +424,8 @@ html[data-theme="dark"] .contact_key,
 html[data-theme="dark"] .contact_act.delete_act{color:#ffffff66;}
 html[data-theme="dark"] .contacts_clear_link:hover,
 html[data-theme="dark"] .contact_act.delete_act:hover{color:#ff5a52;}
-html[data-theme="dark"] .confirm_pub_key:hover, html[data-theme="dark"] .edit_pub_key:hover, html[data-theme="dark"] .copy_button:hover{background:#1377f933;box-shadow:0 0 0 6px #1377f933;}
-html[data-theme="dark"] .cancel_pub_key:hover{background:#ffffff14;box-shadow:0 0 0 6px #ffffff14;}
+html[data-theme="dark"] .confirm_pub_key:hover, html[data-theme="dark"] .edit_pub_key:hover, html[data-theme="dark"] .copy_button:hover{background:#1377f933;border-color:#1377f988;}
+html[data-theme="dark"] .cancel_pub_key:hover{background:#ffffff14;border-color:#ffffff33;}
 html[data-theme="dark"] .std_uploaded{background:#1f1f23;color:#f2f2f5;}
 html[data-theme="dark"] .std_download{background:#161618;border-color:#ffffff1f;color:#f2f2f5;}
 html[data-theme="dark"] .icon_container,
