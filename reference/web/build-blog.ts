@@ -139,7 +139,24 @@ function header(): string {
 function footer(): string {
   return '<footer class="ft"><div class="wrap ft-in"><nav class="ft-links"><a href="/">Home</a><a href="/terms/">Terms</a><a href="/privacy/">Privacy</a><a href="/license/">License</a><a href="mailto:contact@filekey.app">Contact</a></nav><p class="ft-note">No trackers, no cookies, no analytics.</p><p class="ft-copy">&copy; 2026 FileKey</p></div></footer>';
 }
-function layout(o: { title: string; description: string; canonical: string; ogType?: string; ogTitle?: string; main: string }): string {
+// ---- structured data (JSON-LD): machine-readable facts for Google + AI answer engines.
+// A <script type="application/ld+json"> is a data block, not executable JS, so it is exempt
+// from the CSP script-src (no hash needed); "<" is escaped so the JSON can never close the tag.
+const ORG_LD = { "@type": "Organization", name: "FileKey", url: SITE, logo: { "@type": "ImageObject", url: SITE + "/logo.svg" }, sameAs: ["https://github.com/RockwellShah/filekey", "https://filekey.substack.com"] };
+const ld = (obj: unknown): string => JSON.stringify(obj).replace(/</g, "\\u003c");
+function articleJsonLd(p: Post): string {
+  return ld({ "@context": "https://schema.org", "@graph": [
+    { "@type": "BlogPosting", headline: p.title, description: p.description, datePublished: p.date, dateModified: p.date, author: { "@type": "Organization", name: "FileKey", url: SITE }, publisher: ORG_LD, mainEntityOfPage: { "@type": "WebPage", "@id": SITE + p.url }, image: { "@type": "ImageObject", url: SITE + "/og.png", width: 2000, height: 1050 }, url: SITE + p.url, articleSection: p.cat.label, wordCount: p.readMin * 200, inLanguage: "en" },
+    { "@type": "BreadcrumbList", itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Blog", item: SITE + "/blog/" },
+      { "@type": "ListItem", position: 2, name: p.cat.label, item: SITE + "/blog/" + p.cat.key + "/" },
+      { "@type": "ListItem", position: 3, name: p.title, item: SITE + p.url },
+    ] },
+  ] });
+}
+const homeJsonLd = (): string => ld({ "@context": "https://schema.org", "@graph": [ORG_LD, { "@type": "WebSite", name: "FileKey Blog", url: SITE + "/blog/", publisher: { "@type": "Organization", name: "FileKey", url: SITE } }] });
+
+function layout(o: { title: string; description: string; canonical: string; ogType?: string; ogTitle?: string; schema?: string; articleMeta?: { published: string; section: string }; main: string }): string {
   return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
     "<title>" + esc(o.title) + "</title>\n" +
     '<meta name="description" content="' + esc(o.description) + '">\n' +
@@ -158,6 +175,8 @@ function layout(o: { title: string; description: string; canonical: string; ogTy
     '<meta name="twitter:description" content="' + esc(o.description) + '">\n' +
     '<meta name="twitter:image" content="' + SITE + '/og.png">\n' +
     '<link rel="alternate" type="application/rss+xml" title="FileKey Blog" href="/feed.xml">\n' +
+    (o.articleMeta ? '<meta property="article:published_time" content="' + o.articleMeta.published + '">\n<meta property="article:modified_time" content="' + o.articleMeta.published + '">\n<meta property="article:section" content="' + esc(o.articleMeta.section) + '">\n' : "") +
+    (o.schema ? '<script type="application/ld+json">' + o.schema + '</script>\n' : "") +
     '<script src="/blog.js"></script>\n' +
     '<link rel="stylesheet" href="/blog.css">\n' +
     "</head>\n<body>\n" + header() + '\n<main class="wrap">\n' + o.main + "\n</main>\n" + footer() + "\n</body>\n</html>\n";
@@ -196,7 +215,7 @@ const homeMain =
   (showChips ? chips("all", usedCats) : "") +
   (feat ? '<a class="feat" href="' + feat.url + '"><p class="meta">' + metaLine(feat, false) + "</p><h2>" + esc(feat.title) + '</h2><p class="dek">' + esc(feat.description) + "</p></a>\n" : "") +
   rest.map(postRow).join("\n") + "\n" + ctaCard();
-write(join(blogOut, "index.html"), layout({ title: "FileKey Blog", description: "Plain-language guides to sending sensitive things safely, and the engineering underneath.", canonical: SITE + "/blog/", main: homeMain }));
+write(join(blogOut, "index.html"), layout({ title: "FileKey Blog", description: "Plain-language guides to sending sensitive things safely, and the engineering underneath.", canonical: SITE + "/blog/", schema: homeJsonLd(), main: homeMain }));
 
 // Categories (only those with posts)
 for (const c of usedCats) {
@@ -214,7 +233,7 @@ for (const p of posts) {
     '<div class="md-body">' + p.html + "</div>" + ctaCard() +
     (p.next ? '<nav class="next"><p>Read next</p><a href="' + p.next.url + '">' + esc(p.next.title) + " &rarr;</a></nav>" : "") +
     "</article>";
-  write(join(blogOut, p.slug, "index.html"), layout({ title: p.title + " &middot; FileKey", description: p.description, canonical: SITE + p.url, ogType: "article", main }));
+  write(join(blogOut, p.slug, "index.html"), layout({ title: p.title + " &middot; FileKey", description: p.description, canonical: SITE + p.url, ogType: "article", schema: articleJsonLd(p), articleMeta: { published: p.date, section: p.cat.label }, main }));
 }
 
 // Standalone pages (privacy, terms, license)
@@ -224,12 +243,14 @@ for (const pg of pages) {
 }
 
 // sitemap.xml (app + blog)
-const urls = [SITE + "/", SITE + "/blog/"]
-  .concat(usedCats.map((c) => SITE + "/blog/" + c.key + "/"))
-  .concat(posts.map((p) => SITE + p.url))
-  .concat(pages.map((pg) => SITE + pg.path + "/"));
+const urlEntries: { loc: string; lastmod?: string }[] = [
+  { loc: SITE + "/" }, { loc: SITE + "/blog/" },
+  ...usedCats.map((c) => ({ loc: SITE + "/blog/" + c.key + "/" })),
+  ...posts.map((p) => ({ loc: SITE + p.url, lastmod: p.date })),
+  ...pages.map((pg) => ({ loc: SITE + pg.path + "/" })),
+];
 const sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-  urls.map((u) => "  <url><loc>" + u + "</loc></url>").join("\n") + "\n</urlset>\n";
+  urlEntries.map((u) => "  <url><loc>" + u.loc + "</loc>" + (u.lastmod ? "<lastmod>" + u.lastmod + "</lastmod>" : "") + "</url>").join("\n") + "\n</urlset>\n";
 writeFileSync(join(webDir, "sitemap.xml"), sitemap);
 
 // feed.xml (RSS 2.0)
