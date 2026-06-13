@@ -38,6 +38,9 @@ const SVG = {
   edit: `<svg viewBox="0 0 23.6475 23.3041"><rect height="23.3041" opacity="0" width="23.6475" x="0" y="0"/><path d="M15.5591 4.88935L6.08643 4.88935C5.10986 4.88935 4.56299 5.41669 4.56299 6.43232L4.56299 17.5163C4.56299 18.5319 5.10986 19.0495 6.08643 19.0495L17.2095 19.0495C18.186 19.0495 18.7231 18.5319 18.7231 17.5163L18.7231 8.12957L20.2954 6.55445L20.2954 17.5944C20.2954 19.6159 19.27 20.6218 17.229 20.6218L6.05713 20.6218C4.02588 20.6218 2.99072 19.6159 2.99072 17.5944L2.99072 6.34443C2.99072 4.33271 4.02588 3.31708 6.05713 3.31708L17.1313 3.31708Z"/><path d="M9.61182 14.2936L11.5161 13.4636L20.6372 4.35224L19.2993 3.03388L10.188 12.1452L9.30908 13.9811C9.23096 14.1472 9.42627 14.3718 9.61182 14.2936ZM21.3599 3.63935L22.063 2.91669C22.395 2.56513 22.395 2.09638 22.063 1.77412L21.8384 1.53974C21.5356 1.23701 21.0571 1.27607 20.7349 1.58857L20.022 2.29169Z"/></svg>`,
   outbound: `<svg viewBox="0 0 24 24" class="outbound_link"><path d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>`,
   import: `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>`,
+  // "Show QR" toggle on the receive-a-file link. Filled QR glyph (three finder rings + a few modules);
+  // fill-rule evenodd carves the ring holes; fill via currentColor so it follows the link color on hover.
+  qr: `<svg viewBox="0 0 24 24" fill-rule="evenodd"><path d="M3 3h7v7h-7zm2 2h3v3h-3zM14 3h7v7h-7zm2 2h3v3h-3zM3 14h7v7h-7zm2 2h3v3h-3zM14 14h3v3h-3zM18.5 14h2.5v2.5h-2.5zM14 18.5h2.5v2.5h-2.5zM18.5 18.5h2.5v2.5h-2.5z"/></svg>`,
   // Unlock button's "touch to unlock" biometric affordance (a fingerprint). Stroke-based so it inherits
   // the button's text color via currentColor — white on the solid-blue Unlock button. This is a biometric
   // cue, NOT the identity-verification fingerprint deliberately left unbuilt (see DESIGN.md Appendix A).
@@ -142,13 +145,14 @@ async function appMsg(segs: Seg[], opts: { speed?: number; dp?: string; icon?: s
 // A choice row attached inside a chat-message bubble (pass the element appMsg returns) — distinct actions as
 // blue primary + muted secondary chips, the Confirm/Cancel + Save/Skip vocabulary. Use this instead of
 // cramming multiple action links into one appMsg separated by a "·".
-function actionRow(host: HTMLElement, actions: { label: string; muted?: boolean; onClick: () => void }[]): void {
+function actionRow(host: HTMLElement, actions: { label: string; muted?: boolean; icon?: string; onClick: () => void }[]): void {
   const row = document.createElement("div");
   row.className = "msg_actions";
   for (const a of actions) {
     const s = document.createElement("span");
     s.className = `${a.muted ? "cancel_pub_key" : "confirm_pub_key"} no_select`;
-    s.textContent = a.label;
+    if (a.icon) s.innerHTML = `${a.icon}<span>${esc(a.label)}</span>`;
+    else s.textContent = a.label;
     s.addEventListener("click", a.onClick);
     row.appendChild(s);
   }
@@ -816,8 +820,8 @@ async function encryptForRecipient(recipient: string, file: ShareFile, opts: { s
     // Save-only case is what most people see; Save is always offered, Send… only where the sheet exists.
     const canSend = canSendFile(out, sharedName);
     const m = await appMsg([`"${file.name}" is encrypted ${who}. Only they can open it.`], { speed: 6 });
-    const acts: { label: string; muted?: boolean; onClick: () => void }[] = [{ label: "Save", onClick: () => void saveBlob(out, sharedName) }];
-    if (canSend) acts.push({ label: "Send…", onClick: () => void sendFile(out, sharedName) });
+    const acts: { label: string; muted?: boolean; icon?: string; onClick: () => void }[] = [{ label: "Save", icon: SVG.save.replace("<svg", '<svg class="save_icon"'), onClick: () => void saveBlob(out, sharedName) }];
+    if (canSend) acts.push({ label: "Send…", icon: SVG.share.replace("<svg", '<svg class="dl_icon"'), onClick: () => void sendFile(out, sharedName) });
     actionRow(m, acts);
     if (opts.remember !== false) await rememberRecipient(recipient); // add/refresh this recipient in the local address book
   } catch (e) { console.error("FileKey: share encrypt failed —", e); st?.fail(); await appMsg([`Couldn't encrypt for that recipient: ${esc((e as Error).message)}`], ERR); }
@@ -937,23 +941,23 @@ async function showSendLink() {
   p.style.cssText = "font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;line-height:1.6;word-break:break-all;background:var(--fk-fill);border-radius:10px;padding:14px 16px;margin:12px 0 0;color:var(--fk-ink-soft)";
   msg.appendChild(p);
   const acts = document.createElement("div"); acts.style.cssText = "display:flex;gap:18px;margin-top:14px;flex-wrap:wrap";
-  const mk = (label: string) => { const s = document.createElement("span"); s.className = "msg_clickable no_select"; s.style.cursor = "pointer"; s.textContent = label; return s; };
-  const copyBtn = mk("Copy"); acts.appendChild(copyBtn);
-  const shareBtn = typeof navigator.share === "function" ? mk("Share") : null;
+  const mk = (label: string, icon: string, iconCls: string) => { const s = document.createElement("span"); s.className = "dl_action no_select"; s.innerHTML = `${icon.replace("<svg", `<svg class="${iconCls}"`)}<span class="lbl">${esc(label)}</span>`; return s; };
+  const copyBtn = mk("Copy", SVG.copy, "copy_icon"); acts.appendChild(copyBtn);
+  const shareBtn = typeof navigator.share === "function" ? mk("Share", SVG.share, "dl_icon") : null;
   if (shareBtn) acts.appendChild(shareBtn);
-  const qrBtn = mk("Show QR"); acts.appendChild(qrBtn);
+  const qrBtn = mk("Show QR", SVG.qr, "qr_icon"); acts.appendChild(qrBtn);
   msg.appendChild(acts);
   const qrBox = document.createElement("div"); qrBox.style.marginTop = "14px"; msg.appendChild(qrBox);
   scrollToBottom();
-  copyBtn.addEventListener("click", async () => { try { await navigator.clipboard.writeText(link); copyBtn.textContent = "Copied!"; setTimeout(() => (copyBtn.textContent = "Copy"), 1200); } catch {} });
+  copyBtn.addEventListener("click", async () => { try { await navigator.clipboard.writeText(link); const l = copyBtn.querySelector(".lbl")!; l.textContent = "Copied!"; setTimeout(() => (l.textContent = "Copy"), 1200); } catch {} });
   shareBtn?.addEventListener("click", async () => { try { await navigator.share({ url: link, title: "Send me a file securely with FileKey" }); } catch {} });
   qrBtn.addEventListener("click", () => {
-    if (qrBox.childNodes.length) { qrBox.replaceChildren(); qrBtn.textContent = "Show QR"; return; } // toggle off
+    if (qrBox.childNodes.length) { qrBox.replaceChildren(); qrBtn.querySelector(".lbl")!.textContent = "Show QR"; return; } // toggle off
     const qr = qrcode(0, "M"); qr.addData(link); qr.make();
     qrBox.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true }); // QR encodes the link as modules, not HTML — safe
     const svg = qrBox.querySelector("svg");
     if (svg) svg.setAttribute("style", "width:180px;height:180px;background:#fff;border-radius:10px;padding:10px;box-sizing:border-box"); // white quiet zone so it scans + shows in dark mode
-    qrBtn.textContent = "Hide QR";
+    qrBtn.querySelector(".lbl")!.textContent = "Hide QR";
   });
 }
 
