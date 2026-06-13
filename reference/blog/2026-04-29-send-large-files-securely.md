@@ -1,7 +1,7 @@
 ---
 title: How to send large files securely without the cloud
 description: Email caps out around 25 MB. Here's how to send big files privately, without uploading them to a service that can read them.
-date: 2026-09-29
+date: 2026-04-29
 category: Guide
 author: FileKey.app
 ---

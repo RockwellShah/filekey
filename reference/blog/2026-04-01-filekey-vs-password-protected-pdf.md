@@ -1,7 +1,7 @@
 ---
 title: FileKey vs a password-protected PDF
 description: Locking a PDF with a password feels secure. Here's why it's weaker than you think, and when it's actually fine.
-date: 2026-09-01
+date: 2026-04-01
 category: Comparison
 author: FileKey.app
 ---

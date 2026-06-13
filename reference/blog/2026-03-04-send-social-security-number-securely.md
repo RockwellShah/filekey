@@ -1,7 +1,7 @@
 ---
 title: How to send your Social Security number securely
 description: An employer, lender, or accountant needs your SSN. Email and text are the wrong way. Here's how to send it so only they can read it.
-date: 2026-08-04
+date: 2026-03-04
 category: Guide
 author: FileKey.app
 ---

@@ -1,7 +1,7 @@
 ---
 title: How to send a passport copy safely
 description: Visa applications, landlords, and banks all ask for a passport scan. Here's how to send one without losing control of it.
-date: 2026-07-14
+date: 2026-02-14
 category: Guide
 author: FileKey.app
 ---

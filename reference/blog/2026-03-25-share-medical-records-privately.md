@@ -1,7 +1,7 @@
 ---
 title: How to share medical records privately
 description: Sending lab results, scans, or your medical history to a doctor, specialist, or family member? Here's how to keep it between the two of you.
-date: 2026-08-25
+date: 2026-03-25
 category: Guide
 author: FileKey.app
 ---

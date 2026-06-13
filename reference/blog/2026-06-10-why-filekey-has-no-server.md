@@ -1,7 +1,7 @@
 ---
 title: Why FileKey has no server, and why that's safer
 description: FileKey is a static page with no backend. Here's why a security tool with no server to break is more trustworthy, not less.
-date: 2026-11-10
+date: 2026-06-10
 category: Deep dive
 author: FileKey.app
 ---

@@ -1,7 +1,7 @@
 ---
 title: What is HPKE, and why FileKey uses it
 description: HPKE is the modern standard for public-key encryption (RFC 9180). Here's what it is, in plain terms, and why FileKey encrypts your files with it.
-date: 2026-11-03
+date: 2026-06-03
 category: Deep dive
 author: FileKey.app
 ---

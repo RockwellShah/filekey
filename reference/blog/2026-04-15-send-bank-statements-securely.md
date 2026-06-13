@@ -1,7 +1,7 @@
 ---
 title: How to send bank statements securely
 description: Loan, rental, and visa applications all ask for bank statements. Here's how to send them without exposing your account details to every server in between.
-date: 2026-09-15
+date: 2026-04-15
 category: Guide
 author: FileKey.app
 ---

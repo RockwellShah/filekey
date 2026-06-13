@@ -1,7 +1,7 @@
 ---
 title: FileKey vs WeTransfer: what secure file sharing actually means
 description: Both move files from A to B. Only one of them can't read what you're sending. An honest comparison.
-date: 2026-07-21
+date: 2026-02-21
 category: Comparison
 author: FileKey.app
 ---

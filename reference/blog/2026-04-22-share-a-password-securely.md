@@ -1,7 +1,7 @@
 ---
 title: How to share a password securely
 description: Sometimes you have to send a login. Here's how to share a password so it doesn't sit readable in a chat forever.
-date: 2026-09-22
+date: 2026-04-22
 category: Guide
 author: FileKey.app
 ---

@@ -1,7 +1,7 @@
 ---
 title: Passkeys vs passwords: why your face is a better key
 description: Passwords get phished, reused, and breached. Passkeys can't be any of those. Here's what a passkey actually is and why it's a real upgrade.
-date: 2026-08-18
+date: 2026-03-18
 category: Deep dive
 author: FileKey.app
 ---

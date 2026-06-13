@@ -1,7 +1,7 @@
 ---
 title: How to send legal documents and contracts securely
 description: NDAs, contracts, and signed agreements hold more than the parties want public. Here's how to send them so only the other side can read them.
-date: 2026-09-08
+date: 2026-04-08
 category: Guide
 author: FileKey.app
 ---

@@ -1,7 +1,7 @@
 ---
 title: How to send a photo of your ID safely
 description: Verification requests want a photo of your driver's license or ID. Here's how to send it so it can't be reused against you.
-date: 2026-10-13
+date: 2026-05-13
 category: Guide
 author: FileKey.app
 ---

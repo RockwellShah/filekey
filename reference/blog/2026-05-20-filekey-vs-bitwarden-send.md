@@ -1,7 +1,7 @@
 ---
 title: FileKey vs Bitwarden Send
 description: Both send encrypted files and text. Here's how they differ, and when each is the right tool.
-date: 2026-10-20
+date: 2026-05-20
 category: Comparison
 author: FileKey.app
 ---

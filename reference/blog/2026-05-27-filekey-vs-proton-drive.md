@@ -1,7 +1,7 @@
 ---
 title: FileKey vs Proton Drive sharing
 description: Proton Drive offers encrypted storage and sharing. Here's how its sharing compares to FileKey, and when to use which.
-date: 2026-10-27
+date: 2026-05-27
 category: Comparison
 author: FileKey.app
 ---

@@ -1,7 +1,7 @@
 ---
 title: How FileKey turns a passkey into an encryption key
 description: From Face ID to AES-256 with nothing to remember. WebAuthn's PRF extension, HKDF, and HPKE, explained from the spec up.
-date: 2026-07-28
+date: 2026-02-28
 category: Deep dive
 author: FileKey.app
 ---

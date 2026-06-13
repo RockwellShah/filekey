@@ -1,7 +1,7 @@
 ---
 title: Introducing FileKey
 description: Why we built a file encryption tool with no accounts, no passwords, and no server, and why it's a static page on purpose.
-date: 2026-06-12
+date: 2026-01-12
 category: News
 author: FileKey.app
 ---

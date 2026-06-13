@@ -1,7 +1,7 @@
 ---
 title: The best Firefox Send alternatives
 description: Mozilla shut down Firefox Send in 2020. Here are the closest private, encrypted alternatives, and which one fits which job.
-date: 2026-08-11
+date: 2026-03-11
 category: Comparison
 author: FileKey.app
 ---

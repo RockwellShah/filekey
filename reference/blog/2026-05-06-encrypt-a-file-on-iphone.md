@@ -1,7 +1,7 @@
 ---
 title: How to encrypt a file on iPhone (no app to install)
 description: You don't need an app to encrypt a file on iPhone. Here's how to do it in Safari with Face ID, in about a minute.
-date: 2026-10-06
+date: 2026-05-06
 category: Guide
 author: FileKey.app
 ---
