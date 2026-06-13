@@ -14,9 +14,9 @@ A photo of your ID carries your name, address, date of birth, ID number, and sig
 
 ## Send it encrypted
 
-1. Ask the requester to open [filekey.app](/) and tap **Send me a file** for their link.
-2. Open the link, add the photo, and approve with Face ID or Touch ID. It's encrypted on your device to that recipient only.
-3. Send the `.filekey` file by any channel. Only they can open it.
+1. Ask the requester to open [filekey.app](/), create or unlock their filekey (Face ID or Touch ID, about 30 seconds), then open the **Your FileKey** menu (the sliders icon, top right) and choose **Receive a file**. They copy the link it gives them and send it to you.
+2. Open that link and add the photo. FileKey encrypts it in your browser, to the requester only. You don't need an account or a passkey of your own to send, so there's no Face ID step on your end.
+3. You get an encrypted `.shared.filekey` file. Send it by any channel, even regular email. Only the requester can open it, with their own passkey.
 
 > Two habits that help: watermark the image with the purpose and date ("For [company] verification only"), and crop to just what's asked. A watermarked, single-purpose copy is much harder to reuse.
 
