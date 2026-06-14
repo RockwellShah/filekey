@@ -411,7 +411,7 @@ async function genNewPasskey() {
   if (prior.length) {
     // They already made a filekey on this browser — most often they actually meant to sign in. Confirm
     // intent and offer the right path instead of silently minting a second, non-interchangeable identity.
-    const m = await appMsg([`Heads up: you already created a filekey on this device on ${fmtKeyDate(prior[prior.length - 1]!)}. A new one is a separate identity, so files locked with your existing filekey won't open with it.`]);
+    const m = await appMsg([`Heads up: you already created a passkey on this device on ${fmtKeyDate(prior[prior.length - 1]!)}. A new one is a separate identity, so files locked with your existing passkey won't open with it.`]);
     actionRow(m, [
       { label: "Use existing", onClick: () => void loadSecKey() },
       { label: "Create new", muted: true, onClick: () => void doEnroll(true) },
@@ -435,12 +435,12 @@ async function doEnroll(additional: boolean) {
     // Browser allowed PRF but the authenticator didn't (e.g. older Windows Hello): a passkey got
     // created that can't do PRF — tell them, and that they can remove it.
     if (/PRF/i.test((e as Error).message)) { await showPrfUnsupported(true); return; }
-    await appMsg(["Failed to create your filekey. Please try again."], ERR);
+    await appMsg(["Failed to create your passkey. Please try again."], ERR);
     return;
   }
   recordCreated(now);
   createdThisSession = true; // brand-new user: skip the recovery reminder on the create -> authenticate hop
-  await appMsg(["Filekey created. ", { link: "Now tap to unlock", onClick: () => void loadSecKey() }, "."], { speed: 4 });
+  await appMsg(["Passkey created. ", { link: "Now tap to unlock", onClick: () => void loadSecKey() }, "."], { speed: 4 });
 }
 // Glanceable identity for the Your FileKey menu. No passkey name is available on
 // auth, so we derive a deterministic identicon + 8-char fingerprint from the public
@@ -477,7 +477,7 @@ async function loadSecKey() {
     await appMsg([`Failed to unlock. Please try again.`], ERR); return;
   }
   await Contacts.loadContacts(identity!, SET); // local address book (public keys + your nicknames), decrypted into memory
-  await appMsg(["Filekey unlocked. Now drop files to encrypt or decrypt them!"]);
+  await appMsg(["Unlocked. Now drop files to encrypt or decrypt them!"]);
   $("drop_container").style.display = "flex";
   document.body.classList.add("fk-authed"); // reveals the Your FileKey control (sliders) in the top bar
   renderIdentityHeader();
@@ -1311,7 +1311,7 @@ async function intro() {
     " group or ",
     { html: extLinkDot("https://filekey.substack.com/", "Substack") },
   ], { speed: 12 });
-  const m = await appMsg(["To start, unlock your existing filekey or create a new one."]);
+  const m = await appMsg(["To start, unlock with your existing passkey or create a new one."]);
   buttonRow(m, [
     { label: "Unlock", icon: SVG.fingerprint.replace("<svg", '<svg class="fp_icon"'), onClick: () => void loadSecKey() },
     { label: "Create", ghost: true, icon: SVG.plus.replace("<svg", '<svg class="plus_icon"'), onClick: () => void genNewPasskey() },
