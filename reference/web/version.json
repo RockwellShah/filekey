@@ -1,6 +1,16 @@
 {
-  "current": "1.1",
+  "current": "1.12",
   "releases": {
+    "1.12": {
+      "date": "2026-06-13",
+      "notes": [
+        "Security hardening across the board, following a full security review.",
+        "Large files now work fully offline, even the first time you use the app.",
+        "New: a blog with plain-language guides on sending files safely.",
+        "A cleaner interface, with icons and hover cues on every action, a friendlier first run, and a refined logo.",
+        "FileKey now follows your device's light or dark theme by default."
+      ]
+    },
     "1.1": {
       "date": "2026-06-08",
       "notes": [
