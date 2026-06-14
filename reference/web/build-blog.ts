@@ -200,6 +200,37 @@ for (const f of files) {
   const slug = slugify(meta.slug || f.replace(/^\d{4}-\d{2}-\d{2}-/, "").replace(/\.md$/, ""));
   posts.push({ slug, title: meta.title || slug, description: meta.description || "", date: meta.date || "1970-01-01", dateFmt: fmtDate(meta.date || "1970-01-01"), cat, author: meta.author || "FileKey.app", html, readMin: readMin(body), url: "/blog/" + slug + "/" });
 }
+
+// ---- Updates: one release-notes post per version, generated from version.json ----
+// version.json is the single source for the changelog (the app reads it at runtime too), so the
+// on-site Updates posts can't fall out of sync with the in-app notice. To hand-write a release post
+// instead, add reference/blog/<date>-filekey-<version>.md (category: Update) — its slug matches the
+// generated one and overrides it. The build FAILS below if the current version has no notes, so a
+// release can never ship without a changelog.
+let versionManifest: { current?: string; releases?: Record<string, { date?: string; notes?: string[] }> };
+try {
+  versionManifest = JSON.parse(readFileSync(join(webDir, "version.json"), "utf8"));
+} catch (e) {
+  console.error("build-blog: cannot read/parse web/version.json - " + (e as Error).message);
+  process.exit(1);
+}
+const curVer = versionManifest.current;
+const curNotes = (curVer ? versionManifest.releases?.[curVer]?.notes ?? [] : []).filter(Boolean);
+if (!curVer || curNotes.length === 0) {
+  console.error('build-blog: version.json "current" (' + (curVer ?? "unset") + ') has no release notes. Every release needs a changelog - add releases["' + curVer + '"].notes before shipping.');
+  process.exit(1);
+}
+const updatesCat = CATEGORIES.find((c) => c.key === "updates")!;
+for (const [ver, rel] of Object.entries(versionManifest.releases ?? {})) {
+  const relNotes = (rel.notes ?? []).filter(Boolean);
+  if (!relNotes.length) continue;
+  const relSlug = "filekey-" + slugify(ver);
+  if (posts.some((p) => p.slug === relSlug)) continue; // a hand-written post overrides this version
+  const relDate = rel.date || "1970-01-01";
+  const relHtml = "<p>What's new in FileKey " + esc(ver) + ":</p>\n" + '<ul class="md-ul">' + relNotes.map((n) => "<li>" + inline(n) + "</li>").join("") + "</ul>";
+  posts.push({ slug: relSlug, title: "FileKey " + ver, description: "What's new in FileKey " + ver + ".", date: relDate, dateFmt: fmtDate(relDate), cat: updatesCat, author: "FileKey.app", html: relHtml, readMin: readMin(relNotes.join(" ")), url: "/blog/" + relSlug + "/" });
+}
+
 posts.sort((a, b) => (a.date < b.date ? 1 : -1));
 posts.forEach((p, i) => { if (posts.length > 1) p.next = posts[(i + 1) % posts.length]; });
 
@@ -208,8 +239,10 @@ const usedCats = CATEGORIES.filter((c) => posts.some((p) => p.cat.key === c.key)
 // populated categories (see usedCats), so there are never empty drawers.
 const showChips = usedCats.length >= 2;
 
-// Home
-const [feat, ...rest] = posts;
+// Home. Feature the newest non-Updates post as the hero; auto-generated release notes still
+// appear in the list below, the Updates category, the feed, and the sitemap.
+const feat = posts.find((p) => p.cat.key !== "updates") ?? posts[0];
+const rest = posts.filter((p) => p !== feat);
 const homeMain =
   '<div class="mast"><h1>Sending sensitive things safely</h1><p class="tag">Plain-language guides, and the engineering underneath.</p></div>\n' +
   (showChips ? chips("all", usedCats) : "") +
