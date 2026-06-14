@@ -1375,7 +1375,13 @@ function init() {
   window.addEventListener("dragleave", (e) => { e.preventDefault(); if (--depth <= 0) { depth = 0; dragWin.style.display = "none"; fdz.style.display = "none"; } });
   window.addEventListener("drop", (e) => { e.preventDefault(); depth = 0; dragWin.style.display = "none"; fdz.style.display = "none"; const dt = (e as DragEvent).dataTransfer; if (dt) void collectFromDrop(dt).then(handleItems); });
 
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") void checkForUpdate(); });
-  void intro().finally(() => { allowAutoScroll = true; void checkForUpdate(); });
+  void intro().finally(() => {
+    allowAutoScroll = true;
+    void checkForUpdate();
+    // Attach the visibility watcher only AFTER the intro finishes, so a visibilitychange fired during
+    // the intro can't run checkForUpdate concurrently and interleave its notice into the intro feed
+    // (which showed up as the "What's new" card landing mid-intro, e.g. in a fresh/incognito load).
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") void checkForUpdate(); });
+  });
 }
 init();
