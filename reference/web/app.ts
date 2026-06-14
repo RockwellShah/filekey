@@ -1280,13 +1280,18 @@ async function checkForUpdate() {
     return;
   }
 
-  // Case 2 — just updated: this tab IS on the latest build, but this browser hasn't seen this version's
-  // notes yet (a fresh visit or reload after an update). Show "what's new" once, then remember it. This
-  // is what reaches everyone who moves onto a new version, not only tabs left open across the deploy.
+  // Case 2 — returning visitor who moved onto a new build: this tab IS on the latest build, but this
+  // browser last recorded an OLDER version. Show "what's new" once, then remember it.
   let seen: string | null = null;
   try { seen = localStorage.getItem(SEEN_VERSION_KEY); } catch { /* storage blocked — skip */ }
   if (seen === APP_VERSION) return; // already shown the notes for this build
+  // First-ever encounter (no record yet): bootstrap silently and show nothing. A brand-new visitor has
+  // no previous version, so nothing is "new" to them — only a returning visitor who was on an earlier
+  // build should see it. (Trade-off: a pre-feature returning user is indistinguishable from a new one,
+  // so the first time we track anyone is silent; the notice kicks in on their next update.)
+  const firstEncounter = seen === null;
   try { localStorage.setItem(SEEN_VERSION_KEY, APP_VERSION); } catch { /* ignore */ }
+  if (firstEncounter) return;
   const bakedReleases = versionManifest.releases as Releases;
   if (!(bakedReleases?.[APP_VERSION]?.notes ?? []).filter(Boolean).length) return; // no notes for this build
   updatePrompted = true;
