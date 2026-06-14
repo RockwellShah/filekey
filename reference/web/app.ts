@@ -1236,7 +1236,7 @@ async function showChangelog(releases: Releases | undefined): Promise<void> {
     .sort((a, b) => (b.date ?? "").localeCompare(a.date ?? "")); // reverse chronological by date
   const body = entries.length
     ? entries.map((e) =>
-        `<h3 class="msg_number_heading">FileKey ${esc(e.v)}${e.date ? ` · ${esc(fmtReleaseDate(e.date))}` : ""}</h3>` +
+        `<h3 class="msg_number_heading">FileKey v${esc(e.v)}${e.date ? ` · ${esc(fmtReleaseDate(e.date))}` : ""}</h3>` +
         `<ul class="update_notes">${e.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>`,
       ).join("")
     : "<span>No changelog available.</span>";
@@ -1269,7 +1269,7 @@ async function checkForUpdate() {
     const version = latest.current;
     const releases = latest.releases;
     const m = await appMsg(
-      [{ html: `<b>FileKey ${esc(version)} is available.</b>` }],
+      [{ html: `<b>FileKey v${esc(version)} is available.</b>` }],
       { dp: "warning_dp", icon: "warning_filekey_icon" },
     );
     actionRow(m, [
@@ -1290,7 +1290,7 @@ async function checkForUpdate() {
   const bakedReleases = versionManifest.releases as Releases;
   if (!(bakedReleases?.[APP_VERSION]?.notes ?? []).filter(Boolean).length) return; // no notes for this build
   updatePrompted = true;
-  const m = await appMsg([{ html: `<b>What's new in FileKey ${esc(APP_VERSION)}.</b>` }]);
+  const m = await appMsg([{ html: `<b>What's new in FileKey v${esc(APP_VERSION)}.</b>` }]);
   actionRow(m, [
     { label: "Changelog", icon: chipIcon(SVG.doc), onClick: () => void showChangelog(bakedReleases) },
     { label: "Got it", icon: chipIcon(SVG.close), muted: true, onClick: () => m.closest(".std_outer")?.remove() },

@@ -227,8 +227,8 @@ for (const [ver, rel] of Object.entries(versionManifest.releases ?? {})) {
   const relSlug = "filekey-" + slugify(ver);
   if (posts.some((p) => p.slug === relSlug)) continue; // a hand-written post overrides this version
   const relDate = rel.date || "1970-01-01";
-  const relHtml = "<p>What's new in FileKey " + esc(ver) + ":</p>\n" + '<ul class="md-ul">' + relNotes.map((n) => "<li>" + inline(n) + "</li>").join("") + "</ul>";
-  posts.push({ slug: relSlug, title: "FileKey " + ver, description: "What's new in FileKey " + ver + ".", date: relDate, dateFmt: fmtDate(relDate), cat: updatesCat, author: "FileKey.app", html: relHtml, readMin: readMin(relNotes.join(" ")), url: "/blog/" + relSlug + "/" });
+  const relHtml = "<p>What's new in FileKey v" + esc(ver) + ":</p>\n" + '<ul class="md-ul">' + relNotes.map((n) => "<li>" + inline(n) + "</li>").join("") + "</ul>";
+  posts.push({ slug: relSlug, title: "FileKey v" + ver, description: "What's new in FileKey v" + ver + ".", date: relDate, dateFmt: fmtDate(relDate), cat: updatesCat, author: "FileKey.app", html: relHtml, readMin: readMin(relNotes.join(" ")), url: "/blog/" + relSlug + "/" });
 }
 
 posts.sort((a, b) => (a.date < b.date ? 1 : -1));
