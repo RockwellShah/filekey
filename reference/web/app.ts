@@ -1175,6 +1175,7 @@ function initChiz() {
   $("chiz_get_public_key").addEventListener("click", () => { close(); void displayPublicKey(); });
   $("chiz_contacts").addEventListener("click", () => { close(); void showContacts(); });
   $("chiz_recovery").addEventListener("click", () => { close(); void showRecovery(); });
+  $("chiz_changelog").addEventListener("click", () => { close(); void showChangelog(versionManifest.releases as Releases); });
   // Appearance: Light / Dark / Auto. "auto" follows the OS (prefers-color-scheme) and updates live.
   // Default (nothing saved) is auto, following the OS. Choice persists; the menu stays open so the change is visible.
   const themeMql = window.matchMedia("(prefers-color-scheme: dark)");
