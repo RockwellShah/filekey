@@ -1239,7 +1239,15 @@ async function showChangelog(releases: Releases | undefined): Promise<void> {
         `<ul class="update_notes">${e.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>`,
       ).join("")
     : "<span>No changelog available.</span>";
-  await appMsg([{ html: `<h2 class="msg_menu_heading">Changelog</h2>${body}` }], { speed: 24 });
+  // Reveal without the typewriter chasing the bottom, then land on the TOP (newest release):
+  // people open the changelog to see what's new, not to scroll to the oldest entry.
+  const wasAuto = allowAutoScroll;
+  allowAutoScroll = false;
+  const msg = await appMsg([{ html: `<h2 class="msg_menu_heading">Changelog</h2>${body}` }], { speed: 24 });
+  allowAutoScroll = wasAuto;
+  const outer = (msg.closest(".std_outer") as HTMLElement | null) ?? msg;
+  outer.style.scrollMarginTop = "13vh"; // sit the heading just below the fixed header
+  outer.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
 }
 async function checkForUpdate() {
   if (updatePrompted) return;
@@ -1263,7 +1271,7 @@ async function checkForUpdate() {
   actionRow(m, [
     { label: "Update", icon: chipIcon(SVG.download), onClick: () => location.reload() },
     { label: "Changelog", icon: chipIcon(SVG.doc), muted: true, onClick: () => void showChangelog(releases) },
-    { label: "Later", icon: chipIcon(SVG.clock), muted: true, onClick: () => m.querySelector(".msg_actions")?.remove() },
+    { label: "Later", icon: chipIcon(SVG.clock), muted: true, onClick: () => m.closest(".std_outer")?.remove() },
   ]);
 }
 
