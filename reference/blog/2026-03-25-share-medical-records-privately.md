@@ -24,4 +24,4 @@ Health records reveal conditions, medications, and history that you can't take b
 
 If your clinic offers a genuine patient portal, that's a reasonable channel for sharing *with that clinic*. The gap is usually sharing *between* people: getting your own records from one provider to another, or to a family member. That's where encrypting the file yourself keeps you in control, instead of trusting whatever inbox it lands in.
 
-The same method works for [tax documents](/blog/send-tax-documents-securely/), a [passport copy](/blog/send-passport-copy-safely/), or anything else you'd rather keep between two people.
+The same method works for [tax documents](/blog/send-tax-documents-securely/), a [passport copy](/blog/send-passport-copy-safely/), or anything else you'd rather keep between two people. And if you're the provider collecting records, see [how to receive documents from clients securely](/blog/receive-documents-from-clients-securely/).

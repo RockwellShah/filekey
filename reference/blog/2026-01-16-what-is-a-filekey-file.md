@@ -22,7 +22,7 @@ A `.filekey` file is locked to one person's key, so the usual reason it won't op
 
 - **The sender made it before you had FileKey.** Set up at filekey.app, then open the **Your FileKey** menu (the sliders icon, top right) and choose **Receive a file** to get your personal link, and pass it to the sender. When they send a file through your link, the new file is locked to you and will open.
 - **You encrypted it yourself.** Open it on a device signed in with the same passkey you used to create it, or recover access with your recovery code.
-- **You have a recovery code.** FileKey's offline recovery tool can unlock your own files with just the code, no passkey needed.
+- **You have a recovery code.** FileKey's offline recovery tool can unlock your own files with just the code, no passkey needed. (More on this: [what happens if you lose your passkey](/blog/what-happens-if-you-lose-your-passkey/).)
 
 ## Is it safe?
 

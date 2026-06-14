@@ -31,4 +31,4 @@ A portal is a fine answer if your accountant already pays for one. The password-
 
 > **Why this works over plain email:** the attachment everyone's servers can see is unreadable ciphertext. Email becomes a courier that can't peek inside the envelope.
 
-Nothing uploads to FileKey, there's no account to create, and the encryption is the same public-key cryptography (HPKE with AES-256) used by modern secure messengers. If you're curious how a fingerprint becomes an encryption key, we wrote up [the full technical path](/blog/passkey-to-encryption-key/).
+Nothing uploads to FileKey, there's no account to create, and the encryption is the same public-key cryptography (HPKE with AES-256) used by modern secure messengers. If you're curious how a fingerprint becomes an encryption key, we wrote up [the full technical path](/blog/passkey-to-encryption-key/). And if you're the accountant on the receiving end, here's [how to receive documents from clients securely](/blog/receive-documents-from-clients-securely/).
