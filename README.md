@@ -149,6 +149,8 @@ bun run serve       # serve it locally
 
 The build output is plain static files. Host them on any static host or your own server.
 
+> **Self-hosting note:** the passkey relying-party ID is derived as the registrable domain (the last two labels of the host). Host FileKey on your own apex or subdomain (e.g. `files.example.com` → RP-ID `example.com`). A host whose registrable domain is a public suffix (e.g. `you.github.io`, where browsers reject an RP-ID of `github.io`) won't work; use a custom domain instead.
+
 ---
 
 ### 📦 Older Files

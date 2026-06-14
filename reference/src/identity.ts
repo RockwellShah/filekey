@@ -67,12 +67,23 @@ async function deriveP256KeyPair(ikm: Uint8Array): Promise<CryptoKeyPair> {
   if (!sk) throw new FileKeyError("failed to derive a P-256 key pair from IKM", "derive_keypair");
   const pub = p256.getPublicKey(sk, false); // 65-byte SEC1 uncompressed: 0x04 || x(32) || y(32)
   const alg = { name: "ECDH", namedCurve: "P-256" };
+  // Private key imported NON-extractable: nothing exports it, and FileKey hands @hpke the full key PAIR
+  // (cipher.ts createSenderContext/createRecipientContext), so HPKE uses the provided public key and never
+  // reconstructs it from the private one via exportKey("jwk") — the path that fails for some identities when
+  // the key isn't extractable. This removes a one-shot raw-key exfiltration route for any code that runs in
+  // the page. The PUBLIC key stays extractable (suite.kem.serializePublicKey reads its bytes). Verified on
+  // Bun: 71/71 + KAT vectors byte-identical. NOTE: WebKit's JWK import is finicky, so re-confirm Safari
+  // round-trips if this or the deriveKeyPair path above ever changes.
   const privateKey = await crypto.subtle.importKey(
     "jwk",
     { kty: "EC", crv: "P-256", x: base64urlnopad.encode(pub.subarray(1, 33)), y: base64urlnopad.encode(pub.subarray(33, 65)), d: base64urlnopad.encode(sk) },
-    alg, true, ["deriveBits"],
+    alg, false, ["deriveBits"],
   );
   const publicKey = await crypto.subtle.importKey("raw", toArrayBuffer(pub), alg, true, []);
+  // Best-effort scrub of the raw private scalar + KEM PRK. JS can't guarantee wiping (and the JWK `d`
+  // string handed to importKey is an immutable copy we can't reach), but this clears the obvious live copies.
+  sk.fill(0);
+  dkpPrk.fill(0);
   return { privateKey, publicKey };
 }
 
@@ -90,6 +101,7 @@ export async function deriveIdentity(masterPrk: Uint8Array, namespace: Namespace
   const info = new Uint8Array([...ascii(LABEL_IDENTITY_KEM), ...namespace.rpIdBytes]);
   const identityIkm = expand(sha256, masterPrk, info, 32);
   const keyPair = await deriveP256KeyPair(identityIkm);
+  identityIkm.fill(0); // scrub the KEM seed once the keypair is derived (best-effort)
   const staticPkRaw = new Uint8Array(await suite.kem.serializePublicKey(keyPair.publicKey));
   if (staticPkRaw.length !== PK_LEN) {
     throw new FileKeyError(`derived static_pk length ${staticPkRaw.length} != ${PK_LEN}`, "derive_pk_length");
@@ -99,7 +111,12 @@ export async function deriveIdentity(masterPrk: Uint8Array, namespace: Namespace
 
 /** Convenience: PRF output → full identity for a namespace. */
 export async function deriveIdentityFromPrf(prfSecret: Uint8Array, namespace: Namespace): Promise<Identity> {
-  return deriveIdentity(masterPrkFromPrfSecret(prfSecret), namespace);
+  const masterPrk = masterPrkFromPrfSecret(prfSecret);
+  try {
+    return await deriveIdentity(masterPrk, namespace);
+  } finally {
+    masterPrk.fill(0); // scrub the derived master PRK; the caller owns (and scrubs) prfSecret
+  }
 }
 
 export interface Fingerprint {

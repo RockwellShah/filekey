@@ -73,7 +73,14 @@ export async function loadContacts(identity: Identity, namespaces: NamespaceSet)
         }));
     }
   } catch {
-    contacts = []; // corrupt / foreign blob → start clean (overwritten on next save)
+    // The stored blob exists but didn't decrypt/parse (corruption, or — astronomically unlikely — a
+    // different passkey colliding on the 16-byte storage-key prefix). Don't silently discard it: the next
+    // persist() would overwrite it for good. Stash the original once under a .bak key so it stays
+    // recoverable, then start clean in memory.
+    try {
+      if (raw && !localStorage.getItem(storageKey + ".bak")) localStorage.setItem(storageKey + ".bak", raw);
+    } catch { /* storage full/blocked → nothing more we can do */ }
+    contacts = [];
   }
 }
 

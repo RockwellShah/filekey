@@ -1,12 +1,29 @@
 {
-  "current": "1.1",
+  "current": "1.12",
   "releases": {
+    "1.12": {
+      "date": "2026-06-13",
+      "notes": [
+        "Every unlock now requires your biometric or PIN, so a stolen security key alone can't decrypt your files.",
+        "Your private key is now non-extractable: the browser will never hand it out, even to malicious code on the page.",
+        "Sensitive key material is wiped from memory right after it's used.",
+        "The offline recovery tool is locked down with a strict Content-Security-Policy, so no injected code can run. It physically can't phone home.",
+        "Disguised-filename protection strips hidden right-to-left characters from decrypted files, so a sender can't make a .exe look like a .jpg.",
+        "Safer offline behavior: only complete, successful responses are cached, so a failed load can't corrupt your offline copy.",
+        "Your saved contacts are backed up if they ever fail to load, instead of being silently cleared.",
+        "Large files now encrypt and decrypt offline on the very first run, not just after you've been online once.",
+        "A cleaner, more consistent interface: icons on every action, clearer hover cues, a redesigned first run, a refined logo, a theme that follows your system by default, and clearer messaging when saving large files."
+      ]
+    },
     "1.1": {
       "date": "2026-06-08",
       "notes": [
-        "Works on Safari and iPhone, alongside every other modern browser.",
-        "Large files encrypt and decrypt smoothly, without freezing the page.",
-        "Clearer sharing, contacts, and recovery, with refreshed copy throughout."
+        "Support for large files: encrypt and decrypt files of any size without freezing the page, with live progress and a cancel option.",
+        "Support for folders: drop a whole folder or several files and FileKey bundles them into one encrypted file.",
+        "Dark mode, with a Light / Dark / Auto setting (Auto follows your system).",
+        "Offline backup recovery codes: a 24-word recovery phrase plus a standalone offline tool, so you can still decrypt your files even if FileKey ever disappears.",
+        "A contact list for easy sharing: save people's share keys under nicknames, kept encrypted on your device, with import and export.",
+        "Receive a file securely from someone who doesn't use FileKey: share a personal link so anyone can encrypt a file to you, and only your passkey can open it."
       ]
     }
   }

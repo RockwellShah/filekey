@@ -2,8 +2,10 @@
 // Precaches the app shell so FileKey installs as a PWA and runs fully offline
 // (the crypto is all client-side). Strategy: network-first, so an online reload
 // always gets fresh code, falling back to cache when offline.
-const CACHE = "filekey-ref-v4";
-const SHELL = ["/", "/index.html", "/dist/app.js", "/recover.html", "/manifest.json", "/icon.svg", "/logo.svg", "/fonts/inter.woff2"];
+const CACHE = "filekey-ref-v6";
+// /dist/worker.js is precached so large-file (>=64MB) encrypt/decrypt works offline on first run, not
+// only after a prior online large-file op network-cached it.
+const SHELL = ["/", "/index.html", "/dist/app.js", "/dist/worker.js", "/recover.html", "/manifest.json", "/icon.svg", "/logo.svg", "/fonts/inter.woff2"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -27,10 +29,25 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     fetch(req)
       .then((resp) => {
-        const copy = resp.clone();
-        caches.open(CACHE).then((c) => c.put(req, copy));
+        // Only cache a complete, successful response. Caching a 404/500 would poison the offline shell
+        // with an error page; status===200 also skips 206 partials (range requests for the font/media).
+        if (resp.ok && resp.status === 200) {
+          const copy = resp.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy));
+        }
         return resp;
       })
-      .catch(() => caches.match(req).then((cached) => cached || caches.match("/index.html"))),
+      .catch(() =>
+        caches.match(req).then((cached) => {
+          if (cached) return cached;
+          // Offline and uncached: substitute the app shell only for an app navigation (the SPA entry point).
+          // The blog and policy pages are their own documents, not the app shell, so don't pass index.html
+          // off as them. For a missed sub-resource, return a real 504 rather than the wrong page.
+          const path = new URL(req.url).pathname;
+          const isAppRoute = !/^\/(blog|privacy|terms|license)(\/|$)/.test(path);
+          if (req.mode === "navigate" && isAppRoute) return caches.match("/index.html");
+          return new Response("offline", { status: 504, statusText: "Offline" });
+        }),
+      ),
   );
 });

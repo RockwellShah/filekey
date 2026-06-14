@@ -104,7 +104,9 @@ let chosen: File[] = [];
 const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const fmtSize = (n: number) => (n < 1024 ? `${n} B` : n < 1048576 ? `${(n / 1024).toFixed(1)} KB` : `${(n / 1048576).toFixed(1)} MB`);
-const sanitize = (n: string) => (n.replace(/[/\\]/g, "_").replace(/[\x00-\x1f]/g, "").trim() || "decrypted").slice(0, 200);
+// Also strip Unicode bidi override/isolate controls (U+202A–202E, U+2066–2069): a sender-controlled
+// filename can otherwise use RLO to disguise its extension on display/save (e.g. "x<RLO>gpj.exe").
+const sanitize = (n: string) => (n.replace(/[\u202a-\u202e\u2066-\u2069]/g, "").replace(/[/\\]/g, "_").replace(/[\x00-\x1f]/g, "").trim() || "decrypted").slice(0, 200);
 
 function renderList() {
   listEl.innerHTML = chosen.map((f) => `<li>${escapeHtml(f.name)} &middot; ${fmtSize(f.size)}</li>`).join("");

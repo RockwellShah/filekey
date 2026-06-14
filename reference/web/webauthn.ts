@@ -58,14 +58,24 @@ export function deploymentRpId(): string {
 export async function enrollPasskey(displayName: string): Promise<void> {
   const cred = (await navigator.credentials.create({
     publicKey: {
-      rp: { id: deploymentRpId(), name: "FileKey Reference" },
+      rp: { id: deploymentRpId(), name: "FileKey" },
       user: { id: bs(randomBytes(16)), name: displayName || "FileKey", displayName: displayName || "FileKey" },
       challenge: bs(randomBytes(32)),
       pubKeyCredParams: [
         { type: "public-key", alg: -7 }, // ES256
         { type: "public-key", alg: -257 }, // RS256
       ],
-      authenticatorSelection: { residentKey: "required", userVerification: "preferred" },
+      // userVerification MUST be "required", for two reasons:
+      //  1. PRF consistency — the CTAP2 hmac-secret returns a DIFFERENT secret for UV vs non-UV assertions
+      //     (CredRandomWithUV vs CredRandomWithoutUV). Under "preferred" a later assertion can silently skip
+      //     UV and derive a different secret → a different identity that can't open the user's files.
+      //     "required" pins every assertion to UV, so the PRF secret (and thus the identity) is stable.
+      //  2. Theft resistance — forcing UV means a stolen authenticator alone can't decrypt without its
+      //     PIN/biometric (vs a touch-only assertion that needs only physical possession).
+      // (residentKey:"required" already mandates a PIN on a roaming security key at enrollment, so there
+      // are no no-PIN credentials in play either way — "required" excludes no authenticator that could
+      // have enrolled.)
+      authenticatorSelection: { residentKey: "required", userVerification: "required" },
       timeout: 60_000,
       extensions: { prf: {} } as AuthenticationExtensionsClientInputs,
     },
@@ -87,7 +97,7 @@ export async function getPrfSecret(): Promise<Uint8Array> {
     publicKey: {
       rpId: deploymentRpId(),
       challenge: bs(randomBytes(32)),
-      userVerification: "preferred",
+      userVerification: "required", // MUST match enrollment: PRF returns a different secret without UV (see enrollPasskey)
       timeout: 60_000,
       extensions: {
         prf: { eval: { first: bs(PRF_INPUT_SALT) } },

@@ -29,10 +29,18 @@ const server = Bun.serve({
     const url = new URL(req.url);
     let pathname = decodeURIComponent(url.pathname);
     if (pathname === "/") pathname = "/index.html";
+    else if (pathname.endsWith("/")) pathname += "index.html";
     // Prevent path traversal.
     const rel = normalize(pathname).replace(/^(\.\.[/\\])+/, "");
-    const filePath = join(webDir, rel);
+    let filePath = join(webDir, rel);
     if (!filePath.startsWith(webDir)) return new Response("forbidden", { status: 403 });
+
+    // Directory-index resolution (matches Vercel): an extensionless path like
+    // /blog/guides resolves to /blog/guides/index.html, so clean URLs work locally too.
+    if (!(await Bun.file(filePath).exists()) && !/\.[a-z0-9]+$/i.test(rel)) {
+      const alt = join(filePath, "index.html");
+      if (alt.startsWith(webDir) && (await Bun.file(alt).exists())) filePath = alt;
+    }
 
     const file = Bun.file(filePath);
     if (!(await file.exists())) return new Response("not found", { status: 404 });

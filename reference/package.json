@@ -1,9 +1,9 @@
 {
   "name": "filekey-ref",
-  "version": "1.1.0",
+  "version": "1.12.0",
   "type": "module",
-  "description": "Reference implementation of the FileKey Encryption Specification v0.4.7 (passkey + PRF file encryption).",
-  "license": "MIT",
+  "description": "Reference implementation of FileKey: passkey + PRF end-to-end file encryption.",
+  "license": "GPL-3.0-or-later",
   "main": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts"
@@ -13,7 +13,7 @@
     "vectors": "bun run test/gen-vectors.ts",
     "gen:source": "bun run web/gen-source.ts",
     "build:recover": "bun run web/build-recover.ts",
-    "build:web": "bun run web/gen-source.ts && bun build web/app.ts web/worker.ts --outdir web/dist --target browser --minify && bun run web/build-recover.ts",
+    "build:web": "bun run web/gen-source.ts && bun build web/app.ts web/worker.ts web/selftest.ts --outdir web/dist --target browser --minify && bun run web/build-recover.ts && bun run web/build-blog.ts",
     "serve": "bun run web/serve.ts"
   },
   "dependencies": {

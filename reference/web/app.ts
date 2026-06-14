@@ -1,7 +1,7 @@
 // FileKey reference web app.
 // UI/flow is a faithful reproduction of filekey v1 (source.txt): typewriter chat
 // (char_speed = characters per animation frame), the filekey "dp" badge on each
-// message, two-step auth (generate -> "Now tap to authenticate"), animated
+// message, two-step auth (generate -> "Now tap to unlock"), animated
 // Encrypting/Decrypting status, upload-right / download-left cards with Share+Save,
 // the hamburger ("chiz") menu with v1's verbatim content panels.
 //
@@ -37,7 +37,25 @@ const SVG = {
   check: `<svg viewBox="0 0 14 14"><path d="M5.28125 13.6611C4.90625 13.6611 4.58594 13.4945 4.32031 13.1611L0.273438 8.09863C0.174479 7.97884 0.101562 7.86165 0.0546875 7.74707C0.0130208 7.63249 -0.0078125 7.5153 -0.0078125 7.39551C-0.0078125 7.12467 0.0807292 6.90072 0.257812 6.72363C0.440104 6.54655 0.669271 6.45801 0.945312 6.45801C1.26302 6.45801 1.53125 6.60124 1.75 6.8877L5.25 11.3799L12.0312 0.606445C12.151 0.424154 12.2734 0.296549 12.3984 0.223633C12.5234 0.145508 12.6849 0.106445 12.8828 0.106445C13.1536 0.106445 13.375 0.192383 13.5469 0.364258C13.7188 0.530924 13.8047 0.749674 13.8047 1.02051C13.8047 1.12988 13.7865 1.24186 13.75 1.35645C13.7135 1.46582 13.6562 1.58301 13.5781 1.70801L6.23438 13.1533C6.00521 13.4919 5.6875 13.6611 5.28125 13.6611Z"/></svg>`,
   edit: `<svg viewBox="0 0 23.6475 23.3041"><rect height="23.3041" opacity="0" width="23.6475" x="0" y="0"/><path d="M15.5591 4.88935L6.08643 4.88935C5.10986 4.88935 4.56299 5.41669 4.56299 6.43232L4.56299 17.5163C4.56299 18.5319 5.10986 19.0495 6.08643 19.0495L17.2095 19.0495C18.186 19.0495 18.7231 18.5319 18.7231 17.5163L18.7231 8.12957L20.2954 6.55445L20.2954 17.5944C20.2954 19.6159 19.27 20.6218 17.229 20.6218L6.05713 20.6218C4.02588 20.6218 2.99072 19.6159 2.99072 17.5944L2.99072 6.34443C2.99072 4.33271 4.02588 3.31708 6.05713 3.31708L17.1313 3.31708Z"/><path d="M9.61182 14.2936L11.5161 13.4636L20.6372 4.35224L19.2993 3.03388L10.188 12.1452L9.30908 13.9811C9.23096 14.1472 9.42627 14.3718 9.61182 14.2936ZM21.3599 3.63935L22.063 2.91669C22.395 2.56513 22.395 2.09638 22.063 1.77412L21.8384 1.53974C21.5356 1.23701 21.0571 1.27607 20.7349 1.58857L20.022 2.29169Z"/></svg>`,
   outbound: `<svg viewBox="0 0 24 24" class="outbound_link"><path d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>`,
-  import: `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>`,
+  import: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>`,
+  // Contacts-footer actions. export = arrow up out of the tray (mirror of import); trash = Clear all.
+  // Stroke-based with currentColor so they follow the link color (and its hover light-up).
+  export: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M7.5 7.5 12 3m0 0 4.5 4.5M12 3v13.5"/></svg>`,
+  trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg>`,
+  // Cancel's "✗", the counterpart to Confirm's check — only used where a text Cancel sits beside an iconed Confirm.
+  close: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 5 19 19M19 5 5 19"/></svg>`,
+  // "Show QR" toggle on the receive-a-file link. Filled QR glyph (three finder rings + a few modules);
+  // fill-rule evenodd carves the ring holes; fill via currentColor so it follows the link color on hover.
+  qr: `<svg viewBox="0 0 24 24" fill-rule="evenodd"><path d="M3 3h7v7h-7zm2 2h3v3h-3zM14 3h7v7h-7zm2 2h3v3h-3zM3 14h7v7h-7zm2 2h3v3h-3zM14 14h3v3h-3zM18.5 14h2.5v2.5h-2.5zM14 18.5h2.5v2.5h-2.5zM18.5 18.5h2.5v2.5h-2.5z"/></svg>`,
+  // Unlock button's "touch to unlock" biometric affordance (a fingerprint). Stroke-based so it inherits
+  // the button's text color via currentColor — white on the solid-blue Unlock button. This is a biometric
+  // cue, NOT the identity-verification fingerprint deliberately left unbuilt (see DESIGN.md Appendix A).
+  fingerprint: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 8 4"/><path d="M5 19.5C5.5 18 6 15 6 12c0-.7.12-1.37.34-2"/><path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M8.65 22c.21-.66.45-1.32.57-2"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path d="M2 16h.01"/><path d="M21.8 16c.2-2 .131-5.354 0-6"/><path d="M9 6.8a6 6 0 0 1 9 5.2c0 .47 0 1.17-.02 2"/></svg>`,
+  // Update-notice action icons (stroke + currentColor, same family as import/export/trash/close):
+  // download = install the update; doc = open the changelog; clock = "Later" (defer).
+  download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>`,
+  doc: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h5"/></svg>`,
+  clock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>`,
 };
 
 // External-link affordance: the menu's box-arrow glyph, inline, inheriting the link's color.
@@ -56,6 +74,10 @@ const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const $ = (id: string) => document.getElementById(id)!;
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+// Strip Unicode bidi override/embedding/isolate controls (U+202A–202E, U+2066–2069). A sender-controlled
+// filename like "photo<U+202E>gpj.exe" otherwise displays/saves as "photo.jpg" but lands on disk as .exe.
+// Override/isolate chars only — NOT the LRM/RLM marks (U+200E/200F) that legitimate RTL filenames use.
+const stripBidi = (s: string) => s.replace(/[\u202a-\u202e\u2066-\u2069]/g, "");
 let mainInner: HTMLElement;
 let identity: Identity | null = null;
 let allowAutoScroll = false; // suppressed during the intro so the page doesn't auto-scroll on load (mobile)
@@ -134,15 +156,32 @@ async function appMsg(segs: Seg[], opts: { speed?: number; dp?: string; icon?: s
 // A choice row attached inside a chat-message bubble (pass the element appMsg returns) — distinct actions as
 // blue primary + muted secondary chips, the Confirm/Cancel + Save/Skip vocabulary. Use this instead of
 // cramming multiple action links into one appMsg separated by a "·".
-function actionRow(host: HTMLElement, actions: { label: string; muted?: boolean; onClick: () => void }[]): void {
+function actionRow(host: HTMLElement, actions: { label: string; muted?: boolean; icon?: string; onClick: () => void }[]): void {
   const row = document.createElement("div");
   row.className = "msg_actions";
   for (const a of actions) {
     const s = document.createElement("span");
     s.className = `${a.muted ? "cancel_pub_key" : "confirm_pub_key"} no_select`;
-    s.textContent = a.label;
+    if (a.icon) s.innerHTML = `${a.icon}<span>${esc(a.label)}</span>`;
+    else s.textContent = a.label;
     s.addEventListener("click", a.onClick);
     row.appendChild(s);
+  }
+  host.appendChild(row);
+  scrollToBottom();
+}
+// Like actionRow, but renders REAL buttons (the .dc_btn vocabulary: solid-blue primary + ghost outline)
+// with an optional leading icon — for the first-run moment that earns a tappable button over an inline
+// link (Unlock / Create). DESIGN.md: distinct choices belong in a row, never two inline links.
+function buttonRow(host: HTMLElement, buttons: { label: string; icon?: string; ghost?: boolean; onClick: () => void }[]): void {
+  const row = document.createElement("div");
+  row.className = "auth_row";
+  for (const b of buttons) {
+    const btn = document.createElement("button");
+    btn.className = `dc_btn auth_btn ${b.ghost ? "dc_btn_ghost" : "dc_btn_primary"} no_select`;
+    btn.innerHTML = `${b.icon ?? ""}<span>${esc(b.label)}</span>`;
+    btn.addEventListener("click", b.onClick);
+    row.appendChild(btn);
   }
   host.appendChild(row);
   scrollToBottom();
@@ -193,6 +232,7 @@ class StatusMsg {
 // Middle-ellipsis for filenames: pin the tail (extension) and ellipsize the head, so a long name
 // like "Screenshot ….png.filekey" stays one clean line instead of breaking mid-word on mobile.
 function fnameHtml(filename: string): string {
+  filename = stripBidi(filename); // neutralize bidi-override extension spoofing before display
   const safe = esc(filename);
   if (filename.length <= 16) return `<span class="file_title" title="${safe}">${safe}</span>`;
   const tailLen = Math.min(12, Math.ceil(filename.length * 0.35));
@@ -244,7 +284,7 @@ async function sendFile(blob: Blob, filename: string) {
   }
 }
 
-function sanitizeName(name: string) { return (name.replace(/[\/\\]/g, "_").replace(/[\x00-\x1f]/g, "").trim() || "filekey-output").slice(0, 200); }
+function sanitizeName(name: string) { return (stripBidi(name).replace(/[\/\\]/g, "_").replace(/[\x00-\x1f]/g, "").trim() || "filekey-output").slice(0, 200); }
 // Best-effort detection of a storage-constrained context (notably private/incognito, which caps
 // origin storage hard) so a large-file failure can say so rather than a generic "try again".
 async function storageTooSmallFor(bytes: number): Promise<boolean> {
@@ -276,9 +316,12 @@ async function saveBlob(blob: Blob, filename: string) {
     }
   }
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click();
-  // An <a download> has no completion callback and (usually) no cancel dialog: the file just lands in
-  // Downloads. So confirm where it went; for a big file, also warn not to close the tab mid-flush.
-  void appMsg([big ? "Your download is in progress. Keep this tab open until it finishes." : "Saved to your downloads."], { speed: 6 });
+  // An <a download> hands the blob to the browser's own download manager — there's no completion callback,
+  // so we can't show "done" (the browser's download UI does). Frame it as a local save, not a network
+  // transfer, and for a big file note that closing the tab early can interrupt the browser writing the blob.
+  void appMsg([big
+    ? "Your browser is saving the encrypted file to your downloads (nothing leaves your device). It's a large file, so keep this tab open until your browser shows the download finished."
+    : "Saved to your downloads."], { speed: 6 });
   // Keep the URL valid long enough for the download to flush — scale ~1s/MB (60s floor, 10min cap);
   // freed on tab close regardless. (Chrome's native picker path above doesn't reach here.)
   const ttl = Math.min(600_000, Math.max(60_000, Math.ceil(blob.size / (1024 * 1024)) * 1000));
@@ -334,7 +377,7 @@ function runCryptoJob(job: Record<string, unknown>, onProgress?: JobProgress): {
   return { result, cancel: () => end(() => resolveOutcome({ cancelled: true })) };
 }
 
-// ---- identity (v1 genNewPasskey -> "Now tap to authenticate" -> loadSecKey) ----
+// ---- identity (v1 genNewPasskey -> "Now tap to unlock" -> loadSecKey) ----
 // Per-browser record of filekeys created here (timestamps only — no keys, no secrets, so it's fine under
 // the "no secrets stored" rule). Two uses: warn before an accidental *second* filekey (a separate identity
 // whose files won't interchange), and give additional keys a dated name so the OS passkey picker can tell
@@ -397,7 +440,7 @@ async function doEnroll(additional: boolean) {
   }
   recordCreated(now);
   createdThisSession = true; // brand-new user: skip the recovery reminder on the create -> authenticate hop
-  await appMsg(["Filekey created. ", { link: "Now tap to authenticate", onClick: () => void loadSecKey() }, "."], { speed: 4 });
+  await appMsg(["Filekey created. ", { link: "Now tap to unlock", onClick: () => void loadSecKey() }, "."], { speed: 4 });
 }
 // Glanceable identity for the Your FileKey menu. No passkey name is available on
 // auth, so we derive a deterministic identicon + 8-char fingerprint from the public
@@ -423,15 +466,18 @@ function renderIdentityHeader(): void {
 async function loadSecKey() {
   if (identity) return;
   if ((await prfBrowserSupport()) === false) { await showPrfUnsupported(false); return; }
-  try { const prf = await getPrfSecret(); identity = await deriveIdentityFromPrf(prf, NS); }
+  try {
+    const prf = await getPrfSecret();
+    try { identity = await deriveIdentityFromPrf(prf, NS); } finally { prf.fill(0); } // scrub the PRF secret once identity is derived (best-effort)
+  }
   catch (e) {
     console.error("FileKey: authentication failed —", e);
     if ((e as Error).name === "NotAllowedError") return;
     if (/PRF/i.test((e as Error).message)) { await showPrfUnsupported(false); return; }
-    await appMsg([`Authentication failed. Please try again.`], ERR); return;
+    await appMsg([`Failed to unlock. Please try again.`], ERR); return;
   }
   await Contacts.loadContacts(identity!, SET); // local address book (public keys + your nicknames), decrypted into memory
-  await appMsg(["Filekey authenticated. Now drop files to encrypt or decrypt them!"]);
+  await appMsg(["Filekey unlocked. Now drop files to encrypt or decrypt them!"]);
   $("drop_container").style.display = "flex";
   document.body.classList.add("fk-authed"); // reveals the Your FileKey control (sliders) in the top bar
   renderIdentityHeader();
@@ -701,7 +747,7 @@ async function openRecipientPrompt(file: ShareFile) {
   mainInner.appendChild(picker);
   // v1 html_newTextarea: right-aligned, auto-growing, Confirm (check) + Edit (pencil, hidden).
   const tmp = document.createElement("div");
-  tmp.innerHTML = `<div class="pub_key_textarea_cont set_right"><textarea class="pub_key_textarea" placeholder="Enter recipient's share key" rows="1" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off"></textarea><div class="pub_key_actions"><span class="confirm_pub_key no_select">${SVG.check.replace("<svg", '<svg class="confirm_icon"')} <span>Confirm</span></span><span class="cancel_pub_key no_select">Cancel</span><span class="edit_pub_key no_select">${SVG.edit.replace("<svg", '<svg class="edit_icon"')} <span>Edit</span></span></div></div>`;
+  tmp.innerHTML = `<div class="pub_key_textarea_cont set_right"><textarea class="pub_key_textarea" placeholder="Enter recipient's share key" rows="1" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off"></textarea><div class="pub_key_actions"><span class="confirm_pub_key no_select">${SVG.check.replace("<svg", '<svg class="confirm_icon"')} <span>Confirm</span></span><span class="cancel_pub_key no_select">${SVG.close.replace("<svg", '<svg class="cancel_icon"')} <span>Cancel</span></span><span class="edit_pub_key no_select">${SVG.edit.replace("<svg", '<svg class="edit_icon"')} <span>Edit</span></span></div></div>`;
   const cont = tmp.firstElementChild as HTMLElement;
   mainInner.appendChild(cont);
   const ta = cont.querySelector(".pub_key_textarea") as HTMLTextAreaElement;
@@ -788,8 +834,8 @@ async function encryptForRecipient(recipient: string, file: ShareFile, opts: { s
     // Save-only case is what most people see; Save is always offered, Send… only where the sheet exists.
     const canSend = canSendFile(out, sharedName);
     const m = await appMsg([`"${file.name}" is encrypted ${who}. Only they can open it.`], { speed: 6 });
-    const acts: { label: string; muted?: boolean; onClick: () => void }[] = [{ label: "Save", onClick: () => void saveBlob(out, sharedName) }];
-    if (canSend) acts.push({ label: "Send…", onClick: () => void sendFile(out, sharedName) });
+    const acts: { label: string; muted?: boolean; icon?: string; onClick: () => void }[] = [{ label: "Save", icon: SVG.save.replace("<svg", '<svg class="save_icon"'), onClick: () => void saveBlob(out, sharedName) }];
+    if (canSend) acts.push({ label: "Send…", icon: SVG.share.replace("<svg", '<svg class="dl_icon"'), onClick: () => void sendFile(out, sharedName) });
     actionRow(m, acts);
     if (opts.remember !== false) await rememberRecipient(recipient); // add/refresh this recipient in the local address book
   } catch (e) { console.error("FileKey: share encrypt failed —", e); st?.fail(); await appMsg([`Couldn't encrypt for that recipient: ${esc((e as Error).message)}`], ERR); }
@@ -817,9 +863,15 @@ async function sendToMode(toKey: string, rawName?: string) {
   try { decodeShareKey(toKey, SET); }
   catch { await appMsg(["This link is invalid or incomplete. Ask for a fresh one."], ERR); return; }
   const name = (rawName || "").trim().slice(0, 60);
-  const to = name || "the recipient";
-  await appMsg([{ t: name ? `Send ${name} a file.` : "Send a secure file.", b: true },
-    ` Drop a file anywhere, or use the buttons below. It's encrypted on your device so only ${to} can open it. No account or app needed.`]);
+  // The name comes straight from the link (#name=), so it's unverified. Never assert it as the verified
+  // recipient ("only Mom can open it"). State what's cryptographically true (only the link's keyholder can
+  // open it) and nudge the sender to confirm the link's provenance for anything sensitive.
+  const segs: Seg[] = [
+    { t: name ? `Send a file to “${name}”.` : "Send a secure file.", b: true },
+    " Drop a file anywhere, or use the buttons below. It's encrypted in your browser so only the owner of this link's key can open it. No account or app needed.",
+  ];
+  if (name) segs.push(` “${name}” is just the label on this link, so if you're sending anything sensitive, confirm the link really came from them.`);
+  await appMsg(segs);
   const drop = $("drop_container");
   drop.style.display = "flex";
   const dropLabel = drop.querySelector(".file_title") as HTMLElement | null;
@@ -847,7 +899,10 @@ async function sendToMode(toKey: string, rawName?: string) {
 async function handleSendTo(items: BundleItem[], toKey: string, name: string) {
   if (!items.length) return;
   const sender = await deriveThrowawayIdentity();
-  const opts = { sender, who: name || undefined, remember: false };
+  // Don't pass the link's (unverified) name as the recipient label: the post-encrypt confirmation would
+  // otherwise read 'encrypted for "<attacker-chosen name>"'. Anonymous senders have no contacts, so this
+  // falls back to the neutral "for your recipient". (`name` is still shown, framed as a claim, in sendToMode.)
+  const opts = { sender, remember: false };
   if (items.length === 1 && !items[0]!.fromFolder) {
     const f = items[0]!.file;
     uploadCard(f.name, "File", false);
@@ -900,23 +955,23 @@ async function showSendLink() {
   p.style.cssText = "font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;line-height:1.6;word-break:break-all;background:var(--fk-fill);border-radius:10px;padding:14px 16px;margin:12px 0 0;color:var(--fk-ink-soft)";
   msg.appendChild(p);
   const acts = document.createElement("div"); acts.style.cssText = "display:flex;gap:18px;margin-top:14px;flex-wrap:wrap";
-  const mk = (label: string) => { const s = document.createElement("span"); s.className = "msg_clickable no_select"; s.style.cursor = "pointer"; s.textContent = label; return s; };
-  const copyBtn = mk("Copy"); acts.appendChild(copyBtn);
-  const shareBtn = typeof navigator.share === "function" ? mk("Share") : null;
+  const mk = (label: string, icon: string, iconCls: string) => { const s = document.createElement("span"); s.className = "dl_action no_select"; s.innerHTML = `${icon.replace("<svg", `<svg class="${iconCls}"`)}<span class="lbl">${esc(label)}</span>`; return s; };
+  const copyBtn = mk("Copy", SVG.copy, "copy_icon"); acts.appendChild(copyBtn);
+  const shareBtn = typeof navigator.share === "function" ? mk("Share", SVG.share, "dl_icon") : null;
   if (shareBtn) acts.appendChild(shareBtn);
-  const qrBtn = mk("Show QR"); acts.appendChild(qrBtn);
+  const qrBtn = mk("Show QR", SVG.qr, "qr_icon"); acts.appendChild(qrBtn);
   msg.appendChild(acts);
   const qrBox = document.createElement("div"); qrBox.style.marginTop = "14px"; msg.appendChild(qrBox);
   scrollToBottom();
-  copyBtn.addEventListener("click", async () => { try { await navigator.clipboard.writeText(link); copyBtn.textContent = "Copied!"; setTimeout(() => (copyBtn.textContent = "Copy"), 1200); } catch {} });
+  copyBtn.addEventListener("click", async () => { try { await navigator.clipboard.writeText(link); const l = copyBtn.querySelector(".lbl")!; l.textContent = "Copied!"; setTimeout(() => (l.textContent = "Copy"), 1200); } catch {} });
   shareBtn?.addEventListener("click", async () => { try { await navigator.share({ url: link, title: "Send me a file securely with FileKey" }); } catch {} });
   qrBtn.addEventListener("click", () => {
-    if (qrBox.childNodes.length) { qrBox.replaceChildren(); qrBtn.textContent = "Show QR"; return; } // toggle off
+    if (qrBox.childNodes.length) { qrBox.replaceChildren(); qrBtn.querySelector(".lbl")!.textContent = "Show QR"; return; } // toggle off
     const qr = qrcode(0, "M"); qr.addData(link); qr.make();
     qrBox.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true }); // QR encodes the link as modules, not HTML — safe
     const svg = qrBox.querySelector("svg");
     if (svg) svg.setAttribute("style", "width:180px;height:180px;background:#fff;border-radius:10px;padding:10px;box-sizing:border-box"); // white quiet zone so it scans + shows in dark mode
-    qrBtn.textContent = "Hide QR";
+    qrBtn.querySelector(".lbl")!.textContent = "Hide QR";
   });
 }
 
@@ -930,9 +985,14 @@ async function revealRecovery() {
   // Re-verify with the passkey before revealing the recovery code (a bearer secret), and derive
   // master_prk on demand instead of keeping it resident in the Identity between uses.
   let masterPrk: Uint8Array;
-  try { masterPrk = masterPrkFromPrfSecret(await getPrfSecret()); }
+  try {
+    const prf = await getPrfSecret();
+    masterPrk = masterPrkFromPrfSecret(prf);
+    prf.fill(0); // scrub the PRF secret as soon as master_prk is derived
+  }
   catch { await appMsg(["Passkey check cancelled, so the recovery code wasn't shown."], ERR); return; }
   const bip39 = encodeRecoveryBip39(masterPrk);
+  masterPrk.fill(0); // the BIP39 string now carries the code for display; drop the raw master-PRK bytes
   // Same mono-inset format as the share key, but word-break:normal so the phrase wraps at spaces (whole words).
   const msg = appShell();
   const intro = document.createElement("span"); msg.appendChild(intro);
@@ -946,7 +1006,7 @@ async function revealRecovery() {
   // Pair the code with the offline recovery tool (web/recover.html) — a download, not a nav link.
   const tool = document.createElement("p");
   tool.style.cssText = "margin:18px 0 0;font-size:14px;color:var(--fk-muted-2);line-height:1.55";
-  tool.innerHTML = `Even if FileKey disappears, this code still works. Pair it with the <a href="/recover.html" download="filekey-offline-recovery.html" style="color:var(--fk-link);font-weight:500;text-decoration:none;white-space:nowrap">${SVG.save.replace("<svg", '<svg style="width:12px;height:14px;fill:#1377F9;vertical-align:-2px;margin-right:3px"')}offline recovery tool</a>, a single self-contained page that decrypts your files locally.`;
+  tool.innerHTML = `Even if FileKey disappears, this code still works. Pair it with the <a class="msg_link" href="/recover.html" download="filekey-offline-recovery.html" style="font-weight:500;white-space:nowrap">${SVG.save.replace("<svg", '<svg style="width:12px;height:14px;fill:currentColor;vertical-align:-2px;margin-right:3px"')}offline recovery tool</a>, a single self-contained page that decrypts your files locally.`;
   msg.appendChild(tool);
   scrollToBottom();
   copy.addEventListener("click", async () => { try { await navigator.clipboard.writeText(bip39); const l = copy.querySelector(".cp_lbl")!; l.textContent = "Copied!"; setTimeout(() => (l.textContent = "Copy"), 1000); } catch {} });
@@ -979,20 +1039,21 @@ function renderContacts(container: HTMLElement) {
   }
   // footer: Add contact + Import (always); Export + Clear all (only when there are contacts).
   const footer = document.createElement("div"); footer.className = "contacts_footer";
-  const add = document.createElement("span"); add.className = "contacts_add no_select"; add.textContent = "Add";
-  add.addEventListener("click", () => openAddForm(container));
-  footer.appendChild(add);
-  const imp = document.createElement("span"); imp.className = "contacts_add no_select"; imp.textContent = "Import";
-  imp.addEventListener("click", () => importContacts(container));
-  footer.appendChild(imp);
+  const footAct = (cls: string, iconHtml: string, label: string, onClick: () => void) => {
+    const s = document.createElement("span"); s.className = `${cls} no_select`;
+    s.innerHTML = `${iconHtml}<span class="lbl">${esc(label)}</span>`;
+    s.addEventListener("click", onClick); return s;
+  };
+  footer.appendChild(footAct("contacts_add", SVG.plus.replace("<svg", '<svg class="ca_icon" fill="currentColor"'), "Add", () => openAddForm(container)));
+  footer.appendChild(footAct("contacts_add", SVG.import.replace("<svg", '<svg class="ca_icon"'), "Import", () => importContacts(container)));
   if (list.length) {
-    const exp = document.createElement("span"); exp.className = "contacts_add no_select"; exp.textContent = "Export";
-    exp.addEventListener("click", () => exportContacts());
-    footer.appendChild(exp);
-    const clear = document.createElement("span"); clear.className = "contacts_clear_link no_select"; clear.textContent = "Clear All";
+    footer.appendChild(footAct("contacts_add", SVG.export.replace("<svg", '<svg class="ca_icon"'), "Export", () => exportContacts()));
+    const clear = document.createElement("span"); clear.className = "contacts_clear_link no_select";
+    clear.innerHTML = `${SVG.trash.replace("<svg", '<svg class="ca_icon"')}<span class="lbl">Clear All</span>`;
+    const lbl = clear.querySelector(".lbl") as HTMLElement;
     let arming = false;
     clear.addEventListener("click", async () => {
-      if (!arming) { arming = true; clear.textContent = "Clear all contacts? Tap again to confirm"; setTimeout(() => { if (arming) { arming = false; clear.textContent = "Clear All"; } }, 3000); return; }
+      if (!arming) { arming = true; lbl.textContent = "Clear all contacts? Tap again to confirm"; setTimeout(() => { if (arming) { arming = false; lbl.textContent = "Clear All"; } }, 3000); return; }
       await Contacts.clearContacts(); renderContacts(container);
     });
     footer.appendChild(clear);
@@ -1037,7 +1098,7 @@ function openAddForm(container: HTMLElement) {
   container.querySelector(".contacts_footer")?.remove();
   container.querySelector(".add_contact_form")?.remove();
   const form = document.createElement("div"); form.className = "add_contact_form";
-  form.innerHTML = `<textarea class="pub_key_textarea add_key_input" placeholder="Paste the recipient's share key" rows="1" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off"></textarea><input class="nickname_input add_nick_input" type="text" placeholder="Nickname (optional)" maxlength="40" autocomplete="off"><div class="pub_key_actions"><span class="confirm_pub_key no_select add_save">${SVG.check.replace("<svg", '<svg class="confirm_icon"')} <span>Save</span></span><span class="cancel_pub_key no_select add_cancel">Cancel</span></div>`;
+  form.innerHTML = `<textarea class="pub_key_textarea add_key_input" placeholder="Paste the recipient's share key" rows="1" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off"></textarea><input class="nickname_input add_nick_input" type="text" placeholder="Nickname (optional)" maxlength="40" autocomplete="off"><div class="pub_key_actions"><span class="confirm_pub_key no_select add_save">${SVG.check.replace("<svg", '<svg class="confirm_icon"')} <span>Save</span></span><span class="cancel_pub_key no_select add_cancel">${SVG.close.replace("<svg", '<svg class="cancel_icon"')} <span>Cancel</span></span></div>`;
   container.appendChild(form);
   const keyInput = form.querySelector(".add_key_input") as HTMLTextAreaElement;
   const nickInput = form.querySelector(".add_nick_input") as HTMLInputElement;
@@ -1115,11 +1176,11 @@ function initChiz() {
   $("chiz_contacts").addEventListener("click", () => { close(); void showContacts(); });
   $("chiz_recovery").addEventListener("click", () => { close(); void showRecovery(); });
   // Appearance: Light / Dark / Auto. "auto" follows the OS (prefers-color-scheme) and updates live.
-  // Default (nothing saved) is light. Choice persists; the menu stays open so the change is visible.
+  // Default (nothing saved) is auto, following the OS. Choice persists; the menu stays open so the change is visible.
   const themeMql = window.matchMedia("(prefers-color-scheme: dark)");
   // In-memory mode is the source of truth (seeded from storage); persistence is best-effort, so
   // Auto keeps following the OS live even if localStorage writes are blocked (private mode etc.).
-  let themeMode = ((): string => { try { return localStorage.getItem("filekey-theme") || "light"; } catch { return "light"; } })();
+  let themeMode = ((): string => { try { return localStorage.getItem("filekey-theme") || "auto"; } catch { return "auto"; } })();
   const themeOpts = Array.from(document.querySelectorAll<HTMLElement>(".theme_opt"));
   const resolveTheme = (mode: string): "light" | "dark" =>
     mode === "dark" || (mode === "auto" && themeMql.matches) ? "dark" : "light";
@@ -1158,9 +1219,39 @@ function initChiz() {
 // reload into it. version.json is the single source for the user-facing version: imported above as
 // APP_VERSION (the version this bundle shipped as) and re-fetched here to spot a newer deploy.
 let updatePrompted = false;
+type Releases = Record<string, { date?: string; notes?: string[] }>;
+// Friendly date from an ISO "YYYY-MM-DD" string, parsed by hand to avoid Date()/timezone drift.
+function fmtReleaseDate(iso?: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso ?? "");
+  if (!m) return iso ?? "";
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${months[Number(m[2]) - 1] ?? ""} ${Number(m[3])}, ${m[1] ?? ""}`;
+}
+// The full changelog: every release, newest first, as a typed chat panel (the Terms/Privacy menu idiom).
+// Reached from the update notice's Changelog action.
+async function showChangelog(releases: Releases | undefined): Promise<void> {
+  const entries = Object.entries(releases ?? {})
+    .map(([v, r]) => ({ v, date: r?.date, notes: (r?.notes ?? []).filter(Boolean) }))
+    .sort((a, b) => (b.date ?? "").localeCompare(a.date ?? "")); // reverse chronological by date
+  const body = entries.length
+    ? entries.map((e) =>
+        `<h3 class="msg_number_heading">FileKey ${esc(e.v)}${e.date ? ` · ${esc(fmtReleaseDate(e.date))}` : ""}</h3>` +
+        `<ul class="update_notes">${e.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>`,
+      ).join("")
+    : "<span>No changelog available.</span>";
+  // Reveal without the typewriter chasing the bottom, then land on the TOP (newest release):
+  // people open the changelog to see what's new, not to scroll to the oldest entry.
+  const wasAuto = allowAutoScroll;
+  allowAutoScroll = false;
+  const msg = await appMsg([{ html: `<h2 class="msg_menu_heading">Changelog</h2>${body}` }], { speed: 24 });
+  allowAutoScroll = wasAuto;
+  const outer = (msg.closest(".std_outer") as HTMLElement | null) ?? msg;
+  outer.style.scrollMarginTop = "13vh"; // sit the heading just below the fixed header
+  outer.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
+}
 async function checkForUpdate() {
   if (updatePrompted) return;
-  let latest: { current?: string; releases?: Record<string, { date?: string; notes?: string[] }> } | undefined;
+  let latest: { current?: string; releases?: Releases } | undefined;
   try {
     const r = await fetch("/version.json", { cache: "no-store" });
     if (r.ok) latest = await r.json();
@@ -1168,17 +1259,19 @@ async function checkForUpdate() {
   if (!latest?.current || latest.current === APP_VERSION) return;
   updatePrompted = true;
   const version = latest.current;
-  const notes = (latest.releases?.[version]?.notes ?? []).filter(Boolean);
-  const list = notes.length
-    ? ` Here's what's new:<ul class="update_notes">${notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>`
-    : "";
+  const releases = latest.releases;
+  // Keep the notice itself a single line; the detail lives behind the Changelog action.
   const m = await appMsg(
-    [{ html: `<b>FileKey ${esc(version)} is available.</b>${list}` }],
+    [{ html: `<b>FileKey ${esc(version)} is available.</b>` }],
     { dp: "warning_dp", icon: "warning_filekey_icon" },
   );
+  // Size the stroke glyphs inline (no fill, so they stay line art) and space them from the label,
+  // matching the recipient-prompt Confirm/Cancel chips (the .cancel_icon 18px sizer).
+  const chipIcon = (svg: string) => svg.replace("<svg", '<svg style="width:18px;height:18px;margin-right:4px;flex:none"');
   actionRow(m, [
-    { label: "Update now", onClick: () => location.reload() },
-    { label: "Later", muted: true, onClick: () => m.querySelector(".msg_actions")?.remove() },
+    { label: "Update", icon: chipIcon(SVG.download), onClick: () => location.reload() },
+    { label: "Changelog", icon: chipIcon(SVG.doc), muted: true, onClick: () => void showChangelog(releases) },
+    { label: "Later", icon: chipIcon(SVG.clock), muted: true, onClick: () => m.closest(".std_outer")?.remove() },
   ]);
 }
 
@@ -1191,7 +1284,11 @@ async function intro() {
     " group or ",
     { html: extLinkDot("https://filekey.substack.com/", "Substack") },
   ], { speed: 12 });
-  await appMsg(["To start, ", { link: "create", onClick: () => void genNewPasskey() }, " a new filekey or ", { link: "authenticate", onClick: () => void loadSecKey() }, " your existing filekey."]);
+  const m = await appMsg(["To start, unlock your existing filekey or create a new one."]);
+  buttonRow(m, [
+    { label: "Unlock", icon: SVG.fingerprint.replace("<svg", '<svg class="fp_icon"'), onClick: () => void loadSecKey() },
+    { label: "Create", ghost: true, icon: SVG.plus.replace("<svg", '<svg class="plus_icon"'), onClick: () => void genNewPasskey() },
+  ]);
 }
 
 // ---- marching-ants dashed border on the drop zone (v1 createAnimatedBorder) ----
