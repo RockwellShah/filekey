@@ -51,6 +51,11 @@ const SVG = {
   // the button's text color via currentColor — white on the solid-blue Unlock button. This is a biometric
   // cue, NOT the identity-verification fingerprint deliberately left unbuilt (see DESIGN.md Appendix A).
   fingerprint: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 8 4"/><path d="M5 19.5C5.5 18 6 15 6 12c0-.7.12-1.37.34-2"/><path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M8.65 22c.21-.66.45-1.32.57-2"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path d="M2 16h.01"/><path d="M21.8 16c.2-2 .131-5.354 0-6"/><path d="M9 6.8a6 6 0 0 1 9 5.2c0 .47 0 1.17-.02 2"/></svg>`,
+  // Update-notice action icons (stroke + currentColor, same family as import/export/trash/close):
+  // download = install the update; doc = open the changelog; clock = "Later" (defer).
+  download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>`,
+  doc: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h5"/></svg>`,
+  clock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>`,
 };
 
 // External-link affordance: the menu's box-arrow glyph, inline, inheriting the link's color.
@@ -1214,9 +1219,31 @@ function initChiz() {
 // reload into it. version.json is the single source for the user-facing version: imported above as
 // APP_VERSION (the version this bundle shipped as) and re-fetched here to spot a newer deploy.
 let updatePrompted = false;
+type Releases = Record<string, { date?: string; notes?: string[] }>;
+// Friendly date from an ISO "YYYY-MM-DD" string, parsed by hand to avoid Date()/timezone drift.
+function fmtReleaseDate(iso?: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso ?? "");
+  if (!m) return iso ?? "";
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${months[Number(m[2]) - 1] ?? ""} ${Number(m[3])}, ${m[1] ?? ""}`;
+}
+// The full changelog: every release, newest first, as a typed chat panel (the Terms/Privacy menu idiom).
+// Reached from the update notice's Changelog action.
+async function showChangelog(releases: Releases | undefined): Promise<void> {
+  const entries = Object.entries(releases ?? {})
+    .map(([v, r]) => ({ v, date: r?.date, notes: (r?.notes ?? []).filter(Boolean) }))
+    .sort((a, b) => (b.date ?? "").localeCompare(a.date ?? "")); // reverse chronological by date
+  const body = entries.length
+    ? entries.map((e) =>
+        `<h3 class="msg_number_heading">FileKey ${esc(e.v)}${e.date ? ` · ${esc(fmtReleaseDate(e.date))}` : ""}</h3>` +
+        `<ul class="update_notes">${e.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>`,
+      ).join("")
+    : "<span>No changelog available.</span>";
+  await appMsg([{ html: `<h2 class="msg_menu_heading">Changelog</h2>${body}` }], { speed: 24 });
+}
 async function checkForUpdate() {
   if (updatePrompted) return;
-  let latest: { current?: string; releases?: Record<string, { date?: string; notes?: string[] }> } | undefined;
+  let latest: { current?: string; releases?: Releases } | undefined;
   try {
     const r = await fetch("/version.json", { cache: "no-store" });
     if (r.ok) latest = await r.json();
@@ -1224,17 +1251,19 @@ async function checkForUpdate() {
   if (!latest?.current || latest.current === APP_VERSION) return;
   updatePrompted = true;
   const version = latest.current;
-  const notes = (latest.releases?.[version]?.notes ?? []).filter(Boolean);
-  const list = notes.length
-    ? ` Here's what's new:<ul class="update_notes">${notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>`
-    : "";
+  const releases = latest.releases;
+  // Keep the notice itself a single line; the detail lives behind the Changelog action.
   const m = await appMsg(
-    [{ html: `<b>FileKey ${esc(version)} is available.</b>${list}` }],
+    [{ html: `<b>FileKey ${esc(version)} is available.</b>` }],
     { dp: "warning_dp", icon: "warning_filekey_icon" },
   );
+  // Size the stroke glyphs inline (no fill, so they stay line art) and space them from the label,
+  // matching the recipient-prompt Confirm/Cancel chips (the .cancel_icon 18px sizer).
+  const chipIcon = (svg: string) => svg.replace("<svg", '<svg style="width:18px;height:18px;margin-right:4px;flex:none"');
   actionRow(m, [
-    { label: "Update now", onClick: () => location.reload() },
-    { label: "Later", muted: true, onClick: () => m.querySelector(".msg_actions")?.remove() },
+    { label: "Update", icon: chipIcon(SVG.download), onClick: () => location.reload() },
+    { label: "Changelog", icon: chipIcon(SVG.doc), muted: true, onClick: () => void showChangelog(releases) },
+    { label: "Later", icon: chipIcon(SVG.clock), muted: true, onClick: () => m.querySelector(".msg_actions")?.remove() },
   ]);
 }
 
