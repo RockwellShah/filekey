@@ -8,11 +8,11 @@ author: FileKey.app
 
 Contracts, NDAs, signed agreements, case files: legal documents routinely contain terms, figures, and personal details that none of the parties want sitting in a readable inbox. Whether you're a lawyer, a freelancer signing a contract, or a founder handling an NDA, here's how to send legal documents so only the intended party can open them.
 
-## Why "just email it" is a problem
+## Is it safe to email legal documents?
 
 A signed agreement is a record of who agreed to what, often with names, addresses, financial terms, and signatures. Emailed as a plain attachment, it's readable by both mail providers and every backup, and forwarded copies multiply. For privileged or confidential material, that's a real exposure, and one you can't undo after the fact.
 
-## Send it encrypted to the other party
+## How do you send legal documents securely?
 
 1. Ask the other side to open [filekey.app](/), create or unlock their filekey (Face ID, about 30 seconds), then open the **Your FileKey** menu (the sliders icon, top right) and choose **Receive a file** for their personal link.
 2. Open that link and add the document. FileKey encrypts it in your browser into a `.shared.filekey` file only they can open. You don't need an account or a passkey of your own to send, so there's no Face ID step on your end.

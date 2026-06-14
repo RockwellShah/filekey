@@ -8,11 +8,11 @@ author: FileKey.app
 
 You need to send medical records, lab results, a scan, your history, to a new doctor, a specialist, or a family member helping with your care. Health information is some of the most sensitive data you have, and email or a quick photo often isn't as private as you'd hope. Here's how to share it so it stays between you and the person who needs it.
 
-## Why medical data deserves extra care
+## Why does medical data need extra care?
 
 Health records reveal conditions, medications, and history that you can't take back once exposed, and that can follow you through insurance, employment, and everyday privacy for life. Emailed attachments and texted photos sit readable on multiple servers, and even some "secure" portals are readable by the vendor that runs them.
 
-## The private way to send them
+## How do you share medical records privately?
 
 1. Ask the recipient (a doctor's office, a specialist, or a family member) to open [filekey.app](/), create or unlock their filekey (Face ID, about 30 seconds), then open the **Your FileKey** menu (the sliders icon, top right) and choose **Receive a file** for their personal link.
 2. Open that link and add the records (a PDF, images, whatever your provider gave you). FileKey encrypts everything in your browser into one `.shared.filekey` file locked to that recipient. You don't need an account or a passkey of your own to send, so there's no Face ID step on your end.

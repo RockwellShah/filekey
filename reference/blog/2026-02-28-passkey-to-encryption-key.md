@@ -8,7 +8,7 @@ author: FileKey.app
 
 FileKey has no passwords and no key files, yet it does real public-key encryption. The trick is a young piece of the WebAuthn standard that lets your passkey hand the page a secret only it can produce. Here is the whole chain, from a Face ID tap to an AES-256-encrypted file.
 
-## The problem with encryption keys
+## Why is encryption key management so hard?
 
 Encryption is easy. Key management is the hard part. Passwords get reused and phished. Key files get lost or copied. PGP has decades of evidence that people cannot be asked to manage long-lived keypairs by hand. So the question for FileKey was: where do we get a strong, stable, secret key that the user never has to see or store?
 

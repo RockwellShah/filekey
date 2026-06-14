@@ -8,11 +8,11 @@ author: FileKey.app
 
 WeTransfer is the default for sending a file that's too big for email. It's fast and frictionless. But "we transferred your file" and "no one but your recipient can read your file" are different promises, and only one of these tools makes the second one. Here's an honest comparison.
 
-## What WeTransfer does well
+## What does WeTransfer do well?
 
 Let's be fair: WeTransfer is genuinely good at its job. Drop a file, get a link, the recipient downloads it, no account needed for basic use. For a non-sensitive file, a design mockup, a video, a slide deck, it's hard to beat for convenience, and your file is encrypted in transit and at rest on their servers.
 
-## The difference that matters
+## What's the difference between FileKey and WeTransfer?
 
 "Encrypted at rest" means WeTransfer encrypts your file on their servers with **their** keys, which means they can also decrypt it. Your file passes through, and is readable by, WeTransfer's systems. That's fine for a portfolio. It is not fine for a passport, a contract, or your tax return.
 
@@ -29,7 +29,7 @@ FileKey is **end-to-end** encrypted. The file is encrypted on your device, to yo
 | Large files | Yes, with size and tier limits | Yes |
 | Cost | Free tier plus paid Pro | Free and open source |
 
-## When to use which
+## When should you use FileKey vs WeTransfer?
 
 Use WeTransfer (or anything like it) when the file isn't sensitive and you just want a quick download link. Use FileKey when the contents matter, a legal document, anything with an ID number, financial records, medical records, when "the company that runs the service can read this" is not an acceptable answer.
 

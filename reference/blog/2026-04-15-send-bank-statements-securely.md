@@ -8,11 +8,11 @@ author: FileKey.app
 
 A lender, a landlord, or a visa office wants your recent bank statements. They show your account number, your balance, and every transaction, a clear picture of your finances and a useful one to a fraudster. Here's how to send them so only the requester can read them.
 
-## What's actually in a bank statement
+## Why is a bank statement sensitive?
 
 Account and routing numbers, your balance, your spending, your employer (visible from deposits), and your address. Emailed in the clear, all of that sits readable on multiple servers indefinitely. It's enough for account fraud and a detailed profile of you.
 
-## Send them encrypted
+## How do you send bank statements securely?
 
 1. Ask the requester to open [filekey.app](/), create or unlock their filekey (Face ID, about 30 seconds), then open the **Your FileKey** menu (the sliders icon, top right) and choose **Receive a file** for their link.
 2. Open that link and add the statement PDFs. FileKey encrypts them in your browser to that recipient only. You don't need an account or a passkey of your own to send, so there's no Face ID step on your end.

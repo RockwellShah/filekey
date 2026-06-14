@@ -16,7 +16,7 @@ A `.filekey` file is an encrypted file made with FileKey. If someone sent you on
 
 If the file was encrypted to you, you get the original back instantly, exactly as it was sent. The unlocking happens in your browser; the file is never uploaded anywhere. First time here? FileKey sets you up with a passkey first, the same Face ID or fingerprint sign-in you already use elsewhere. It takes about 30 seconds, with no account and no password.
 
-## If it won't open
+## Why won't a .filekey file open?
 
 A `.filekey` file is locked to one person's key, so the usual reason it won't open is that it was not encrypted to you:
 

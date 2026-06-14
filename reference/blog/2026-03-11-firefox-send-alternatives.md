@@ -8,7 +8,7 @@ author: FileKey.app
 
 Firefox Send was a favorite: drop a file, get an encrypted link, and it expired on its own. Mozilla shut it down in 2020 after abuse problems, and nothing has cleanly replaced it. Here's an honest rundown of the closest options today, and where FileKey fits.
 
-## What made Send good (and what to look for)
+## What made Firefox Send good?
 
 Send's appeal was three things: end-to-end encryption (the link held the key, so Mozilla couldn't read your file), a self-destruct timer, and zero friction (no account). A real replacement has to keep the encryption; the link and the timer are conveniences on top.
 
@@ -19,7 +19,7 @@ Send's appeal was three things: end-to-end encryption (the link held the key, so
 - **Wormhole.** Slick, link-based, end-to-end encrypted, with files that expire. Good for one-off transfers, if you're happy trusting a hosted service to stay online.
 - **FileKey.** End-to-end encrypted to a specific person via their passkey, with no account and no server. A different model: you encrypt a file *to a recipient* rather than minting a public link.
 
-## Which to pick
+## Which Firefox Send alternative should you pick?
 
 | You want | Pick |
 | --- | --- |

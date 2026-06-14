@@ -8,11 +8,11 @@ author: FileKey.app
 
 Passwords have been the worst part of the internet for thirty years. Passkeys are the replacement that's finally good enough to win, and they're the foundation FileKey is built on. Here's what a passkey actually is, in plain terms, and why it beats a password on every axis that matters.
 
-## What a password really is
+## What is a password, really?
 
 A password is a shared secret: you know it, the website stores a hash of it, and you both have to keep it safe. That model has three fatal flaws. You reuse it, so one breach unlocks many accounts. You can be tricked into typing it on a fake site, which is phishing. And the site can leak its whole database, which is a breach. None of these is user error you can fully train away; they're built into the design.
 
-## What a passkey is
+## What is a passkey?
 
 A passkey is a public and private key pair created on your device. The private key never leaves your device's secure hardware; the website only ever stores your public key. To sign in, your device proves it holds the private key by signing a challenge, unlocked by your Face ID, Touch ID, or PIN.
 
@@ -26,7 +26,7 @@ That one change removes all three flaws at once:
 
 Passkeys sync through your platform: iCloud Keychain across Apple devices, Google Password Manager across Android and Chrome. Lose a phone and your passkeys are still on your other devices. A hardware security key is the exception, since it's a single physical object, which is why any tool that leans on one should give you a recovery path.
 
-## Why FileKey builds on passkeys
+## Why does FileKey build on passkeys?
 
 FileKey takes this a step further: it uses your passkey not to sign in to an account (it has none) but to *encrypt*. The same secure-hardware key that would prove who you are instead derives your encryption identity, so you get real public-key encryption with nothing to remember. We wrote up the exact mechanism in [how FileKey turns a passkey into an encryption key](/blog/passkey-to-encryption-key/).
 

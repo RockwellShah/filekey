@@ -8,11 +8,11 @@ author: FileKey.app
 
 It's tax season. Your accountant needs your W-2, a few 1099s, maybe a passport scan. The default move is to attach them to an email, and it's the worst option available. Here's why, and three safer ways ranked by effort.
 
-## Why email is the wrong tool
+## Is it safe to email tax documents?
 
 Email was designed for delivery, not secrecy. An attachment sits in readable form on your machine, your provider's servers, your accountant's inbox, and every backup of all three, indefinitely. You're not trusting one company with your Social Security number; you're trusting an unknown number of them, forever.
 
-## The options, ranked
+## What's the safest way to send tax documents?
 
 | Method | Who can read it | Effort |
 | --- | --- | --- |
@@ -23,7 +23,7 @@ Email was designed for delivery, not secrecy. An attachment sits in readable for
 
 A portal is a fine answer if your accountant already pays for one. The password-protected PDF is the trap: old PDF encryption is weak, and the password almost always travels over the same channel as the file, which defeats the point.
 
-## Sending your W-2 with FileKey
+## How do you send a W-2 with FileKey?
 
 1. Ask your accountant to open [filekey.app](/), create or unlock their filekey (Face ID, about 30 seconds), then open the **Your FileKey** menu (the sliders icon, top right) and choose **Receive a file**. It's free. They copy the link it gives them and send it to you.
 2. Open that link and choose your documents. FileKey encrypts everything in your browser into a single `.shared.filekey` file locked to your accountant alone. You don't need an account or a passkey of your own to send, so there's no Face ID step on your end.

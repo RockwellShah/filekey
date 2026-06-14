@@ -12,7 +12,7 @@ You don't need to install anything to encrypt a file on an iPhone. As of FileKey
 
 An iPhone running iOS 18 or later (so Safari supports passkey-based encryption), and the file you want to encrypt, in Files, Photos, or anywhere you can share from. That's it. No App Store download, no account.
 
-## Encrypt a file
+## How do you encrypt a file on iPhone?
 
 1. Open [filekey.app](/) in Safari. The first time, it sets you up with a passkey using Face ID, about 30 seconds.
 2. Add the file by tapping to choose from Files or Photos.

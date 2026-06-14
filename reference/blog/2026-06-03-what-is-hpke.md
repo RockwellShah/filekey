@@ -8,11 +8,11 @@ author: FileKey.app
 
 FileKey encrypts files with HPKE, a relatively new internet standard for public-key encryption. If you've heard of it from TLS or MLS and wondered what it actually does, here's a plain explanation, and why it's the right tool for encrypting a file to a person.
 
-## The problem HPKE solves
+## What problem does HPKE solve?
 
 Public-key encryption sounds simple: encrypt to someone's public key, only their private key decrypts. But doing it correctly, combining the public-key step with fast symmetric encryption, picking safe algorithms, and binding it all together, has historically been a minefield of subtle mistakes. HPKE (Hybrid Public Key Encryption, RFC 9180, published 2022) is the IETF's answer: one vetted, standard construction so nobody has to reinvent it.
 
-## How it works, briefly
+## How does HPKE work?
 
 HPKE has three parts, named in its suite:
 
@@ -22,7 +22,7 @@ HPKE has three parts, named in its suite:
 
 Put together: the sender's browser does a key agreement with the recipient's public key, derives a key, and encrypts the file with AES-256. Only the recipient's private key can complete the agreement and decrypt.
 
-## Why FileKey uses it
+## Why does FileKey use HPKE?
 
 - **It's standard and vetted**, not homemade crypto. The same construction is used in TLS Encrypted Client Hello and the Messaging Layer Security (MLS) protocol.
 - **It fits the model exactly**: encrypt to a public key (your recipient's passkey-derived identity), with no shared password needed.

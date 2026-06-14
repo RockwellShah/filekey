@@ -8,11 +8,11 @@ author: FileKey.app
 
 Someone has asked you to send a copy of your passport: a visa service, a landlord, a bank, a new employer. It's one of the most sensitive documents you own, and the ways most people send it are the least safe. Here's how to do it without leaving a copy on every server in between.
 
-## Why a passport scan is risky to send
+## Why is sending a passport copy risky?
 
 A passport copy is a near-complete identity kit: your photo, full name, date and place of birth, passport number, and signature. That is more than enough for identity theft. When you email or message it, the file sits in readable form on your device, your provider's servers, the recipient's inbox, and every backup of all three, often for years. Once it's out, you can't pull it back.
 
-## The safer options, ranked
+## What's the safest way to send a passport copy?
 
 | Method | Who can read it | Effort |
 | --- | --- | --- |
@@ -23,7 +23,7 @@ A passport copy is a near-complete identity kit: your photo, full name, date and
 
 If the company that needs your passport offers a secure upload portal, use it. Otherwise the most private option is to encrypt the file so that only that one recipient can open it.
 
-## Send a passport copy with FileKey
+## How do you send a passport copy with FileKey?
 
 1. Ask the recipient to open [filekey.app](/), create or unlock their filekey (Face ID, about 30 seconds), then open the **Your FileKey** menu (the sliders icon, top right) and choose **Receive a file**. They copy the link it generates and send it to you.
 2. Open that link and add your passport scan. FileKey encrypts it in your browser into a single `.shared.filekey` file locked to that recipient. You don't need an account or a passkey of your own to send, so there's no Face ID step on your end.

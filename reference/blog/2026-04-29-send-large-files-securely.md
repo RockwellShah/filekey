@@ -8,11 +8,11 @@ author: FileKey.app
 
 Email attachments cap out around 25 MB, so for anything bigger, a video, a design archive, a database export, people reach for a cloud link. But most cloud transfer services can read what you upload. Here's how to send a large file privately, without handing it to a server that holds the keys.
 
-## The usual trade-off
+## Why are cloud transfer links a privacy risk?
 
 The convenient options, cloud drives and transfer links, store your file on their servers, encrypted with their keys, which means they can read it. That's fine for a non-sensitive video, and not fine for anything confidential. Free tiers also come with size limits and expiry you don't control.
 
-## Encrypt first, then send
+## How do you send a large file privately?
 
 FileKey encrypts the file on your device before it goes anywhere, so the size of the file doesn't change who can read it: only your recipient, ever.
 
