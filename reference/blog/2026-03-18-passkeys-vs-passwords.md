@@ -28,6 +28,6 @@ Passkeys sync through your platform: iCloud Keychain across Apple devices, Googl
 
 ## Why FileKey builds on passkeys
 
-FileKey takes this a step further: it uses your passkey not just to sign in but to *encrypt*. The same secure-hardware key that proves who you are also derives your encryption identity, so you get real public-key encryption with nothing to remember. We wrote up the exact mechanism in [how FileKey turns a passkey into an encryption key](/blog/passkey-to-encryption-key/).
+FileKey takes this a step further: it uses your passkey not to sign in to an account (it has none) but to *encrypt*. The same secure-hardware key that would prove who you are instead derives your encryption identity, so you get real public-key encryption with nothing to remember. We wrote up the exact mechanism in [how FileKey turns a passkey into an encryption key](/blog/passkey-to-encryption-key/).
 
 The short version: a password is something you know and can lose; a passkey is something your device holds and proves. For both signing in and encrypting, that's simply a better key.

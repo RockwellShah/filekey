@@ -14,7 +14,7 @@ Passkeys solved signing in. FileKey uses the same hardware to solve encryption. 
 
 ## How sending works
 
-Your recipient opens FileKey and taps **Send me a file**, which gives them a personal link. You open their link, choose a file, and approve with Face ID or Touch ID. FileKey encrypts the file to them, on your device, and hands you back a `.filekey` file. You send that file over any channel you already use: email, chat, a USB stick. Only your recipient can open it. There is no relay reading your data, because there is no relay at all.
+Your recipient opens FileKey, creates a filekey, and chooses **Receive a file** from the Your FileKey menu, which gives them a personal link. You open their link and add a file: your browser encrypts it to them, with no account or passkey of your own needed, and hands you back a `.shared.filekey` file. You send that file over any channel you already use: email, chat, a USB stick. Only your recipient can open it. There is no relay reading your data, because there is no relay at all.
 
 ## What makes it different
 

@@ -20,9 +20,9 @@ A password you can change. Your SSN you cannot. It's the master key to credit, t
 
 ## Send it with FileKey
 
-1. Ask the recipient to open [filekey.app](/) and tap **Send me a file**. They send you the link it gives them.
-2. Put the number (or the form or card image) in a file, open their link, add it, and approve with Face ID or Touch ID. It's encrypted on your device to that recipient only.
-3. Send the resulting `.filekey` file by any channel, even email. Only they can open it.
+1. Ask the recipient to open [filekey.app](/), create or unlock their filekey (Face ID, about 30 seconds), then open the **Your FileKey** menu (the sliders icon, top right) and choose **Receive a file**. They copy the link it gives them and send it to you.
+2. Put the number (or the form or card image) in a file, open their link, and add it. FileKey encrypts it in your browser to that recipient only. You don't need an account or a passkey of your own to send, so there's no Face ID step on your end.
+3. Send the resulting `.shared.filekey` file by any channel, even email. Only they can open it, with their own passkey.
 
 > If you only need to send the nine digits, put them in a plain text file and encrypt that. The point isn't the file type, it's that the contents are unreadable to everyone except your recipient.
 

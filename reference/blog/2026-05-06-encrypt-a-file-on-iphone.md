@@ -10,16 +10,16 @@ You don't need to install anything to encrypt a file on an iPhone. As of FileKey
 
 ## What you need
 
-An iPhone with Safari, a recent iOS for passkey support, and the file you want to encrypt, in Files, Photos, or anywhere you can share from. That's it. No App Store download, no account.
+An iPhone running iOS 18 or later (so Safari supports passkey-based encryption), and the file you want to encrypt, in Files, Photos, or anywhere you can share from. That's it. No App Store download, no account.
 
 ## Encrypt a file
 
 1. Open [filekey.app](/) in Safari. The first time, it sets you up with a passkey using Face ID, about 30 seconds.
 2. Add the file by tapping to choose from Files or Photos.
-3. Approve with Face ID. FileKey encrypts it on your device and gives you a `.filekey` file to save or share.
+3. Approve with Face ID. FileKey encrypts the file on your device into a `.filekey` file locked to you, and hands it back to save in Files. Only your passkey can open it.
 
-To send it to someone, use their **Send me a file** link first, so the file is encrypted to them. To encrypt for yourself (a private copy), just encrypt and save; only your passkey can open it later.
+To open it again later, reopen [filekey.app](/), add the `.filekey` file, and approve with Face ID; you get the original back. To send a file *to someone else* instead, tap **Share** on the encrypted result and paste their share key (or open the **Receive a file** link they send you), which locks it to them as a `.shared.filekey` file.
 
-> Everything happens on your phone. The file is never uploaded, and there's no account, so nothing about it leaves your device.
+> Everything happens on your phone. The file is never uploaded and there's no account; the encryption runs locally, in Safari.
 
 New to the format? See [what a .filekey file is](/blog/what-is-a-filekey-file/). FileKey 1.1 added this iPhone support, [here's what else changed](/blog/filekey-1-1/).

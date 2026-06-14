@@ -14,8 +14,8 @@ A signed agreement is a record of who agreed to what, often with names, addresse
 
 ## Send it encrypted to the other party
 
-1. Ask the other side to open [filekey.app](/) and tap **Send me a file** for their personal link.
-2. Open the link, add the document, and approve with Face ID or Touch ID. It's encrypted on your device into a `.filekey` file only they can open.
+1. Ask the other side to open [filekey.app](/), create or unlock their filekey (Face ID, about 30 seconds), then open the **Your FileKey** menu (the sliders icon, top right) and choose **Receive a file** for their personal link.
+2. Open that link and add the document. FileKey encrypts it in your browser into a `.shared.filekey` file only they can open. You don't need an account or a passkey of your own to send, so there's no Face ID step on your end.
 3. Send it by whatever channel you already use. The contents stay private even when the channel isn't.
 
 > Because each file is encrypted to a specific recipient, a forwarded copy is useless to anyone else. It can only be opened by the person you sent it to.

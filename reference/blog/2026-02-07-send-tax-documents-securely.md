@@ -25,8 +25,8 @@ A portal is a fine answer if your accountant already pays for one. The password-
 
 ## Sending your W-2 with FileKey
 
-1. Ask your accountant to open [filekey.app](/) and tap **Send me a file**. It's free and takes about a minute. They send you the link it gives them.
-2. Open their link, choose your documents, and approve with Face ID or Touch ID. FileKey encrypts everything on your device into a single `.filekey` file locked to your accountant alone.
+1. Ask your accountant to open [filekey.app](/), create or unlock their filekey (Face ID, about 30 seconds), then open the **Your FileKey** menu (the sliders icon, top right) and choose **Receive a file**. It's free. They copy the link it gives them and send it to you.
+2. Open that link and choose your documents. FileKey encrypts everything in your browser into a single `.shared.filekey` file locked to your accountant alone. You don't need an account or a passkey of your own to send, so there's no Face ID step on your end.
 3. Send that file however you like, even regular email. Only your accountant can open it.
 
 > **Why this works over plain email:** the attachment everyone's servers can see is unreadable ciphertext. Email becomes a courier that can't peek inside the envelope.

@@ -16,9 +16,9 @@ The convenient options, cloud drives and transfer links, store your file on thei
 
 FileKey encrypts the file on your device before it goes anywhere, so the size of the file doesn't change who can read it: only your recipient, ever.
 
-1. The recipient opens [filekey.app](/), taps **Send me a file**, and sends you the link.
-2. Open the link, add the large file, and approve with Face ID or Touch ID. FileKey encrypts it on your device, handling big files without freezing the page.
-3. You get an encrypted `.filekey` file. Send it however you normally move large files, and only your recipient can open it.
+1. The recipient opens [filekey.app](/), creates or unlocks their filekey, then opens the **Your FileKey** menu (the sliders icon, top right), chooses **Receive a file**, and sends you the link.
+2. Open that link and add the large file. FileKey encrypts it in your browser, handling big files without freezing the page. You don't need an account or a passkey of your own to send.
+3. You get an encrypted `.shared.filekey` file. Send it however you normally move large files, and only your recipient can open it, with their own passkey.
 
 > Because the file is already encrypted, you can use any large-file transfer you like to actually move it, even a regular cloud link. The service carrying it can't read it.
 

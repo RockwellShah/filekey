@@ -19,9 +19,9 @@ A password in a chat or email stays there, on both devices and both providers' s
 
 ## With FileKey
 
-1. The recipient opens [filekey.app](/), taps **Send me a file**, and sends you the link.
-2. Put the password in a text file, open the link, add it, and approve with Face ID or Touch ID.
-3. Send the `.filekey` file. Only they can read it.
+1. The recipient opens [filekey.app](/), creates or unlocks their filekey, then opens the **Your FileKey** menu (the sliders icon, top right), chooses **Receive a file**, and sends you the link.
+2. Put the password in a text file, open the link, and add it. FileKey encrypts it in your browser to the recipient only, with no Face ID step on your end.
+3. Send the `.shared.filekey` file. Only they can read it, with their own passkey.
 
 > Whatever method you use, change the password afterward if it protected anything important, and never reuse it elsewhere.
 

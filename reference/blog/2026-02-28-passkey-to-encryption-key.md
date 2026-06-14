@@ -30,14 +30,14 @@ Because the identity is derived from the PRF secret, it is reproducible: the sam
 
 To send a file, FileKey uses **HPKE** (Hybrid Public Key Encryption, RFC 9180), the modern standard also used by MLS and TLS Encrypted Client Hello. The exact suite is **DHKEM(P-256, HKDF-SHA-256)** for the key agreement and **AES-256-GCM** for the bulk encryption, streamed in chunks so a multi-gigabyte file never has to fit in memory.
 
-In plain terms: your browser performs a Diffie-Hellman key agreement between your identity and the recipient's public key, derives a fresh symmetric key, and encrypts the file with AES-256. Only the recipient's private key, sitting behind their passkey, can complete the other half of that agreement and decrypt.
+In plain terms: your browser performs a Diffie-Hellman key agreement between a sender key and the recipient's public key, derives a fresh symmetric key, and encrypts the file with AES-256. (The sender key is your FileKey identity, or a one-time throwaway key when you send through someone's Receive-a-file link.) Only the recipient's private key, sitting behind their passkey, can complete the other half of that agreement and decrypt.
 
 ## Why this is a good trade
 
 - **Nothing to manage.** The key is your passkey. There is no password to phish and no key file to lose.
 - **Nothing stored.** The identity is recomputed from the PRF secret each session, and the private key is non-extractable.
 - **Boring, audited primitives.** HKDF, P-256, AES-256-GCM, HPKE: standard building blocks, not homemade crypto.
-- **Recoverable.** A one-time recovery code lets you re-derive your identity if you ever lose the passkey, so "the key is your passkey" does not mean "lose the passkey, lose everything."
+- **Recoverable.** A recovery code (saved once at setup) lets you re-derive your identity if you ever lose the passkey, so "the key is your passkey" does not mean "lose the passkey, lose everything."
 
 The whole client is open source: you can read [the exact source](/source.txt) that runs in your browser, or start with [what a .filekey file is](/blog/what-is-a-filekey-file/).
 

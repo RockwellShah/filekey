@@ -14,8 +14,8 @@ Health records reveal conditions, medications, and history that you can't take b
 
 ## The private way to send them
 
-1. Ask the recipient (a doctor's office, a specialist, or a family member) to open [filekey.app](/) and tap **Send me a file** for their personal link.
-2. Open the link, add the records (a PDF, images, whatever your provider gave you), and approve with Face ID or Touch ID. Everything is encrypted on your device into one `.filekey` file locked to that recipient.
+1. Ask the recipient (a doctor's office, a specialist, or a family member) to open [filekey.app](/), create or unlock their filekey (Face ID, about 30 seconds), then open the **Your FileKey** menu (the sliders icon, top right) and choose **Receive a file** for their personal link.
+2. Open that link and add the records (a PDF, images, whatever your provider gave you). FileKey encrypts everything in your browser into one `.shared.filekey` file locked to that recipient. You don't need an account or a passkey of your own to send, so there's no Face ID step on your end.
 3. Send it however is convenient. Only they can open it.
 
 > Multiple files, like a set of scans plus a lab report, are bundled and encrypted together, so the recipient gets a single file that unpacks into everything you sent.

@@ -25,9 +25,9 @@ If the company that needs your passport offers a secure upload portal, use it. O
 
 ## Send a passport copy with FileKey
 
-1. Ask the recipient to open [filekey.app](/) and tap **Send me a file**. They send you the personal link it generates.
-2. Open their link, add your passport scan, and approve with Face ID or Touch ID. FileKey encrypts the file on your device into a single `.filekey` file locked to that recipient.
-3. Send the `.filekey` file any way you like, even regular email. Only they can open it.
+1. Ask the recipient to open [filekey.app](/), create or unlock their filekey (Face ID, about 30 seconds), then open the **Your FileKey** menu (the sliders icon, top right) and choose **Receive a file**. They copy the link it generates and send it to you.
+2. Open that link and add your passport scan. FileKey encrypts it in your browser into a single `.shared.filekey` file locked to that recipient. You don't need an account or a passkey of your own to send, so there's no Face ID step on your end.
+3. Send the `.shared.filekey` file any way you like, even regular email. Only they can open it, with their own passkey.
 
 > **Why this is different:** the attachment that travels through everyone's servers is unreadable ciphertext. Even if your email is breached later, your passport isn't sitting in it in any usable form.
 

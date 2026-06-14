@@ -14,9 +14,9 @@ Account and routing numbers, your balance, your spending, your employer (visible
 
 ## Send them encrypted
 
-1. Ask the requester to open [filekey.app](/) and tap **Send me a file** for their link.
-2. Open the link, add the statement PDFs, and approve with Face ID or Touch ID. They're encrypted on your device to that recipient only.
-3. Send the `.filekey` file by any channel. Only they can open it.
+1. Ask the requester to open [filekey.app](/), create or unlock their filekey (Face ID, about 30 seconds), then open the **Your FileKey** menu (the sliders icon, top right) and choose **Receive a file** for their link.
+2. Open that link and add the statement PDFs. FileKey encrypts them in your browser to that recipient only. You don't need an account or a passkey of your own to send, so there's no Face ID step on your end.
+3. Send the `.shared.filekey` file by any channel. Only they can open it, with their own passkey.
 
 > Most banks let you download statements as PDFs. Download them, then encrypt and send, rather than forwarding the bank's own email (which may link back to your login).
 
