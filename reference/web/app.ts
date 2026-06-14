@@ -1249,29 +1249,50 @@ async function showChangelog(releases: Releases | undefined): Promise<void> {
   outer.style.scrollMarginTop = "13vh"; // sit the heading just below the fixed header
   outer.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
 }
+const SEEN_VERSION_KEY = "filekey-seen-version";
 async function checkForUpdate() {
   if (updatePrompted) return;
+  // Stroke glyphs sized inline (no fill, so they stay line art), spaced from the label — matches the
+  // recipient-prompt Confirm/Cancel chips (the .cancel_icon 18px sizer).
+  const chipIcon = (svg: string) => svg.replace("<svg", '<svg style="width:18px;height:18px;margin-right:4px;flex:none"');
   let latest: { current?: string; releases?: Releases } | undefined;
   try {
     const r = await fetch("/version.json", { cache: "no-store" });
     if (r.ok) latest = await r.json();
   } catch { /* offline or unreachable — nothing to do */ }
-  if (!latest?.current || latest.current === APP_VERSION) return;
+
+  // Case 1 — stale tab: a newer build is deployed but this tab still runs the old one, so offer to
+  // reload. Only a tab left open across a deploy hits this; a fresh load already pulled the latest.
+  if (latest?.current && latest.current !== APP_VERSION) {
+    updatePrompted = true;
+    const version = latest.current;
+    const releases = latest.releases;
+    const m = await appMsg(
+      [{ html: `<b>FileKey ${esc(version)} is available.</b>` }],
+      { dp: "warning_dp", icon: "warning_filekey_icon" },
+    );
+    actionRow(m, [
+      { label: "Update", icon: chipIcon(SVG.download), onClick: () => location.reload() },
+      { label: "Changelog", icon: chipIcon(SVG.doc), muted: true, onClick: () => void showChangelog(releases) },
+      { label: "Later", icon: chipIcon(SVG.clock), muted: true, onClick: () => m.closest(".std_outer")?.remove() },
+    ]);
+    return;
+  }
+
+  // Case 2 — just updated: this tab IS on the latest build, but this browser hasn't seen this version's
+  // notes yet (a fresh visit or reload after an update). Show "what's new" once, then remember it. This
+  // is what reaches everyone who moves onto a new version, not only tabs left open across the deploy.
+  let seen: string | null = null;
+  try { seen = localStorage.getItem(SEEN_VERSION_KEY); } catch { /* storage blocked — skip */ }
+  if (seen === APP_VERSION) return; // already shown the notes for this build
+  try { localStorage.setItem(SEEN_VERSION_KEY, APP_VERSION); } catch { /* ignore */ }
+  const bakedReleases = versionManifest.releases as Releases;
+  if (!(bakedReleases?.[APP_VERSION]?.notes ?? []).filter(Boolean).length) return; // no notes for this build
   updatePrompted = true;
-  const version = latest.current;
-  const releases = latest.releases;
-  // Keep the notice itself a single line; the detail lives behind the Changelog action.
-  const m = await appMsg(
-    [{ html: `<b>FileKey ${esc(version)} is available.</b>` }],
-    { dp: "warning_dp", icon: "warning_filekey_icon" },
-  );
-  // Size the stroke glyphs inline (no fill, so they stay line art) and space them from the label,
-  // matching the recipient-prompt Confirm/Cancel chips (the .cancel_icon 18px sizer).
-  const chipIcon = (svg: string) => svg.replace("<svg", '<svg style="width:18px;height:18px;margin-right:4px;flex:none"');
+  const m = await appMsg([{ html: `<b>What's new in FileKey ${esc(APP_VERSION)}.</b>` }]);
   actionRow(m, [
-    { label: "Update", icon: chipIcon(SVG.download), onClick: () => location.reload() },
-    { label: "Changelog", icon: chipIcon(SVG.doc), muted: true, onClick: () => void showChangelog(releases) },
-    { label: "Later", icon: chipIcon(SVG.clock), muted: true, onClick: () => m.closest(".std_outer")?.remove() },
+    { label: "Changelog", icon: chipIcon(SVG.doc), onClick: () => void showChangelog(bakedReleases) },
+    { label: "Got it", icon: chipIcon(SVG.close), muted: true, onClick: () => m.closest(".std_outer")?.remove() },
   ]);
 }
 
