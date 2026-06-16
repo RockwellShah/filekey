@@ -33,6 +33,16 @@ export interface Identity {
   readonly keyPair: CryptoKeyPair;
   /** static_pk as 65-byte SEC1 uncompressed. */
   readonly staticPkRaw: Uint8Array;
+  /**
+   * Retained master_prk (§4.2 RECOMMENDS caching it in the session). Populated by {@link deriveIdentity};
+   * REQUIRED to encrypt/decrypt suite 0x02 symmetric self-encryption (which derives file keys straight
+   * from it — no KEM). Optional because a minimally-reconstructed identity (e.g. one rebuilt inside a
+   * Web Worker from a postMessage'd keypair for large-file HPKE ops) may not carry it; such an identity
+   * can still do suite 0x01 but the self path throws a clear "master_prk_missing" error. It is a
+   * session-lifetime copy held alongside `keyPair`; in v1 it compromises the same single identity as that
+   * keypair, though master_prk is strictly the more powerful root in general (it derives the keypair).
+   */
+  readonly masterPrk?: Uint8Array;
 }
 
 // ---- DHKEM(P-256) DeriveKeyPair over @noble (Safari-compatible) ----
@@ -106,7 +116,9 @@ export async function deriveIdentity(masterPrk: Uint8Array, namespace: Namespace
   if (staticPkRaw.length !== PK_LEN) {
     throw new FileKeyError(`derived static_pk length ${staticPkRaw.length} != ${PK_LEN}`, "derive_pk_length");
   }
-  return { namespace, keyPair, staticPkRaw };
+  // Retain an independent copy of master_prk on the identity (§4.2) so suite 0x02 self-encryption can
+  // derive file keys without a fresh PRF gesture. `.slice()` survives the caller's scrub of its own copy.
+  return { namespace, keyPair, staticPkRaw, masterPrk: masterPrk.slice() };
 }
 
 /** Convenience: PRF output → full identity for a namespace. */

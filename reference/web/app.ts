@@ -15,7 +15,7 @@ import {
   deriveIdentityFromPrf, masterPrkFromPrfSecret,
   encodeShareKey, decodeShareKey, identityFingerprint,
   encodeRecoveryBip39,
-  encryptToSelf, decrypt, encryptStream, decryptStream,
+  encryptToSelf, selfEncryptStream, decrypt, encryptStream, decryptStream,
   parseHeader, FileKeyError, HEADER_LEN,
   type Identity, type Metadata, type ByteSource,
 } from "../src/index.js";
@@ -571,7 +571,7 @@ async function decryptFile(file: File) {
 async function decryptStreaming(file: File, st: StatusMsg) {
   // Big file → decrypt in a Worker. A failed/truncated file rejects (no partial plaintext assembled), and the
   // rejection reaches decryptFile's catch with the original FileKeyError code intact (see runCryptoJob).
-  const job = runCryptoJob({ kind: "decrypt", rpId: RP_ID, rpIds: [RP_ID], keyPair: identity!.keyPair, staticPk: identity!.staticPkRaw, file }, (d, t) => st.progress(d, t));
+  const job = runCryptoJob({ kind: "decrypt", rpId: RP_ID, rpIds: [RP_ID], keyPair: identity!.keyPair, staticPk: identity!.staticPkRaw, masterPrk: identity!.masterPrk, file }, (d, t) => st.progress(d, t));
   st.enableCancel(job.cancel);
   const out = await job.result;
   if ("cancelled" in out) return; // dropped the decrypted prefix; nothing saved
@@ -626,7 +626,7 @@ async function encryptSingle(file: File) {
     const meta: Omit<Metadata, "originalSize"> = { filename: file.name, mimeType: file.type || "application/octet-stream", createdAtUnixMs: Date.now(), extras: new Map() };
     if (file.size >= STREAM_THRESHOLD) {
       // Big file → run the encrypt in a Worker so the main thread stays responsive (see runCryptoJob).
-      const job = runCryptoJob({ kind: "encrypt", rpId: RP_ID, senderKeyPair: identity!.keyPair, senderPk: identity!.staticPkRaw, recipientPk: identity!.staticPkRaw, blob: file, metadata: meta }, (d, t) => st.progress(d, t));
+      const job = runCryptoJob({ kind: "encrypt", rpId: RP_ID, selfEncrypt: true, senderKeyPair: identity!.keyPair, senderPk: identity!.staticPkRaw, recipientPk: identity!.staticPkRaw, senderMasterPrk: identity!.masterPrk, blob: file, metadata: meta }, (d, t) => st.progress(d, t));
       st.enableCancel(job.cancel);
       const out = await job.result;
       if ("cancelled" in out) return; // dropped in-flight output; nothing saved
@@ -668,17 +668,18 @@ async function encryptBundle(items: BundleItem[]) {
     if (total >= STREAM_THRESHOLD) {
       // Big folder → zip + encrypt in a Worker (the zip's CRC32 is the biggest main-thread cost). Progress
       // spans both phases (zip read + encrypt ≈ 2x bytes). shareSource is the archive, returned for Share.
-      const job = runCryptoJob({ kind: "zipEncrypt", rpId: RP_ID, senderKeyPair: identity!.keyPair, senderPk: identity!.staticPkRaw, recipientPk: identity!.staticPkRaw, items, totalBytes: total, metadata: meta }, (d, t) => st.progress(d, t));
+      const job = runCryptoJob({ kind: "zipEncrypt", rpId: RP_ID, selfEncrypt: true, senderKeyPair: identity!.keyPair, senderPk: identity!.staticPkRaw, recipientPk: identity!.staticPkRaw, senderMasterPrk: identity!.masterPrk, items, totalBytes: total, metadata: meta }, (d, t) => st.progress(d, t));
       st.enableCancel(job.cancel);
       const out = await job.result;
       if ("cancelled" in out) return; // cancelled during zip or encrypt; nothing saved
       st.done();
       downloadCard(`${zipName}.filekey`, "Encrypted Bundle", true, out.blob, out.shareSource ?? new Blob([]), zipName, "application/octet-stream");
     } else {
-      // Small folder → zip + encrypt on the main thread (fast; not worth the Worker round-trip).
+      // Small folder → zip + self-encrypt on the main thread (fast; not worth the Worker round-trip).
+      // Uses suite 0x02 (selfEncryptStream), like single-file encryptToSelf, so bundles are post-quantum-safe.
       const zipBlob = await zipBundleToBlob(items);
       const parts: Blob[] = [];
-      for await (const piece of encryptStream({ senderIdentity: identity!, recipientPkRaw: identity!.staticPkRaw, namespace: identity!.namespace, plaintext: blobSource(zipBlob), metadata: meta })) parts.push(new Blob([piece as unknown as BlobPart]));
+      for await (const piece of selfEncryptStream({ masterPrk: identity!.masterPrk!, namespace: identity!.namespace, plaintext: blobSource(zipBlob), metadata: meta })) parts.push(new Blob([piece as unknown as BlobPart]));
       st.done();
       downloadCard(`${zipName}.filekey`, "Encrypted Bundle", true, new Blob(parts), zipBlob, zipName, "application/octet-stream");
     }  } catch (e) {

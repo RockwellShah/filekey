@@ -5,6 +5,8 @@
 // original Uint8Array-in/Uint8Array-out signatures and are thin wrappers that drive the
 // generators and collect the result. The wire format is byte-for-byte identical either way.
 import { p256 } from "@noble/curves/nist.js";
+import { sha256 } from "@noble/hashes/sha2.js";
+import { expand } from "@noble/hashes/hkdf.js";
 import { ascii, concat, u32be, Reader, equalCT, bs, toHex, ByteSource, bytesSource } from "./bytes.js";
 import {
   PK_LEN,
@@ -19,11 +21,16 @@ import {
   METADATA_NONCE,
   LABEL_PAYLOAD_KEY,
   LABEL_METADATA_KEY,
+  SUITE_ID,
+  SUITE_SELF,
+  SELF_SALT_LEN,
+  LABEL_SELF_PAYLOAD_KEY,
+  LABEL_SELF_METADATA_KEY,
 } from "./constants.js";
 import { FileKeyError, Namespace, NamespaceSet } from "./namespace.js";
 import { suite, Identity, toArrayBuffer } from "./identity.js";
 import { Metadata, encodeMetadata, decodeMetadata } from "./metadata.js";
-import { buildHeader, parseHeader, buildInfo, buildAad, chunkNonce } from "./wire.js";
+import { buildHeader, parseHeader, buildInfo, buildAad, buildSelfAad, chunkNonce } from "./wire.js";
 
 /** Validate a 65-byte uncompressed SEC1 P-256 point (§5.3). Throws on any failure. */
 export function validateUncompressedPk(raw: Uint8Array, what: string): void {
@@ -189,17 +196,144 @@ async function collect(gen: AsyncGenerator<Uint8Array>): Promise<Uint8Array> {
 }
 
 // ----------------------------------------------------------------------------
+// Self-encryption — suite 0x02 (§5.6, §6.5)
+//
+// Self-encryption needs no asymmetric crypto: the user already holds master_prk, so the file keys come
+// straight from it via HKDF — no KEM, no sender_pk, no hpke_enc. A suite-0x02 file therefore carries no
+// public key and nothing for Shor to attack, making it post-quantum-safe (only AES-256 remains, which
+// Grover merely halves to ~128-bit). STREAM, 12-byte nonces, the all-zero metadata nonce, and the
+// truncation/size checks are all identical to suite 0x01.
+// ----------------------------------------------------------------------------
+
+export interface SelfEncryptInput {
+  /** The encrypting identity's retained master_prk (Identity.masterPrk). */
+  masterPrk: Uint8Array;
+  /** The file's namespace (provides the tag for the header and rp_id for key derivation). */
+  namespace: Namespace;
+  plaintext: Uint8Array;
+  metadata: Omit<Metadata, "originalSize">;
+}
+
+/** Streaming variant of {@link SelfEncryptInput}: plaintext is read incrementally from a ByteSource. */
+export interface SelfEncryptStreamInput {
+  masterPrk: Uint8Array;
+  namespace: Namespace;
+  plaintext: ByteSource;
+  metadata: Omit<Metadata, "originalSize">;
+}
+
+function randomSalt(n: number): Uint8Array {
+  const s = new Uint8Array(n);
+  crypto.getRandomValues(s); // n = 32 ≤ 65536, within the spec-strict per-call cap
+  return s;
+}
+
+/**
+ * Suite 0x02 file keys (§6.5):
+ *   k = HKDF-Expand(master_prk, label || I2OSP(len(rp_id),1) || rp_id || file_salt, 32)
+ * master_prk is already an HKDF PRK (§4.2), so Expand (not Extract+Expand) is correct — this uses
+ * @noble's expand directly, matching identity.ts. rp_id is length-prefixed so the info is unambiguous;
+ * file_salt makes the keys per-file unique (master_prk is constant and STREAM nonces are deterministic
+ * counters, so without it two files would reuse a (key, nonce) pair — catastrophic AES-GCM failure).
+ */
+async function deriveSelfKeys(
+  masterPrk: Uint8Array,
+  rpIdBytes: Uint8Array,
+  fileSalt: Uint8Array,
+): Promise<{ payloadKey: CryptoKey; metadataKey: CryptoKey }> {
+  if (!masterPrk || masterPrk.length !== 32) throw new FileKeyError("master_prk must be 32 bytes for self-encryption", "master_prk_length");
+  if (rpIdBytes.length > 255) throw new FileKeyError("rp_id too long for u8 length prefix", "rpid_length");
+  if (fileSalt.length !== SELF_SALT_LEN) throw new FileKeyError(`file_salt must be ${SELF_SALT_LEN} bytes`, "self_salt_length");
+  const lenPrefix = new Uint8Array([rpIdBytes.length]);
+  const pInfo = concat(ascii(LABEL_SELF_PAYLOAD_KEY), lenPrefix, rpIdBytes, fileSalt);
+  const mInfo = concat(ascii(LABEL_SELF_METADATA_KEY), lenPrefix, rpIdBytes, fileSalt);
+  const pRaw = expand(sha256, masterPrk, pInfo, 32);
+  const mRaw = expand(sha256, masterPrk, mInfo, 32);
+  const payloadKey = await importAesKey(toArrayBuffer(pRaw));
+  const metadataKey = await importAesKey(toArrayBuffer(mRaw));
+  pRaw.fill(0); // scrub the raw key bytes; WebCrypto holds its own copy after import (best-effort)
+  mRaw.fill(0);
+  return { payloadKey, metadataKey };
+}
+
+/** Core streaming self-encryption (§6.5). Yields header‖file_salt‖u32(metaCtLen)‖metaCt, then payload chunks. */
+async function* selfSealStream(input: SelfEncryptStreamInput, saltForTest?: Uint8Array): AsyncGenerator<Uint8Array> {
+  const { masterPrk, namespace } = input;
+  const M = input.plaintext.size;
+
+  const header = buildHeader(namespace.tag, SUITE_SELF);
+  const fileSalt = saltForTest ?? randomSalt(SELF_SALT_LEN);
+  const { payloadKey, metadataKey } = await deriveSelfKeys(masterPrk, namespace.rpIdBytes, fileSalt);
+  const aad = buildSelfAad(header, fileSalt);
+
+  const fullMeta: Metadata = { ...input.metadata, originalSize: M };
+  const metaCt = await aesSeal(metadataKey, METADATA_NONCE, aad, encodeMetadata(fullMeta));
+  if (metaCt.length > METADATA_CT_MAX || metaCt.length < METADATA_CT_MIN) {
+    throw new FileKeyError("metadata ciphertext length out of bounds", "metadata_ct_bounds");
+  }
+
+  yield concat(header, fileSalt, u32be(metaCt.length), metaCt);
+
+  const totalChunks = M === 0 ? 1 : Math.ceil(M / CHUNK_SIZE);
+  if (totalChunks > MAX_CHUNK_INDEX) throw new FileKeyError("payload exceeds 2^32 chunk cap", "chunk_overflow");
+  for (let i = 0; i < totalChunks; i++) {
+    const start = i * CHUNK_SIZE;
+    const end = Math.min(start + CHUNK_SIZE, M);
+    const chunkPt = await input.plaintext.slice(start, end);
+    if (chunkPt.length !== end - start) {
+      throw new FileKeyError(`plaintext source returned ${chunkPt.length} bytes, expected ${end - start}`, "source_short_read");
+    }
+    const isLast = i === totalChunks - 1;
+    yield await aesSeal(payloadKey, chunkNonce(i, isLast), aad, chunkPt);
+  }
+}
+
+/** Streaming self-encryption (§6.5). Byte-identical to {@link selfEncrypt}. */
+export function selfEncryptStream(input: SelfEncryptStreamInput): AsyncGenerator<Uint8Array> {
+  return selfSealStream(input);
+}
+
+/** Core self-encryption (§6.5). Returns the complete .filekey file bytes (suite 0x02). */
+export async function selfEncrypt(input: SelfEncryptInput): Promise<Uint8Array> {
+  return collect(selfSealStream(toSelfStreamInput(input)));
+}
+
+/**
+ * TEST ONLY: self-encrypt with a caller-supplied file_salt for reproducible vectors. NOT re-exported
+ * from index.ts. Reusing a salt for the same master_prk repeats every nonce — catastrophic GCM reuse.
+ */
+export async function selfEncryptWithSaltForTest(input: SelfEncryptInput, fileSalt: Uint8Array): Promise<Uint8Array> {
+  return collect(selfSealStream(toSelfStreamInput(input), fileSalt));
+}
+
+function toSelfStreamInput(input: SelfEncryptInput): SelfEncryptStreamInput {
+  return {
+    masterPrk: input.masterPrk,
+    namespace: input.namespace,
+    plaintext: bytesSource(input.plaintext),
+    metadata: input.metadata,
+  };
+}
+
+// ----------------------------------------------------------------------------
 // Decryption (§7.2)
 // ----------------------------------------------------------------------------
 
 export interface DecryptResult {
   metadata: Metadata;
   plaintext: Uint8Array;
-  /** The sender's static_pk (65-byte uncompressed) — for application identity resolution (§7.3). */
+  /**
+   * The sender's static_pk (65-byte uncompressed) — for application identity resolution (§7.3).
+   * For suite 0x02 self-encrypted files there is no sender field in the file; this reports the
+   * decrypting identity's own static_pk (a self-encrypted file's "sender" is, by construction, you),
+   * but note suite 0x02 provides NO cryptographic sender authentication — `suiteId` distinguishes it.
+   */
   senderPkRaw: Uint8Array;
   namespace: Namespace;
-  /** True when sender_pk == the recipient's static_pk (self-encrypted file). */
+  /** True when sender_pk == the recipient's static_pk (self-encrypted file); always true for suite 0x02. */
   selfEncrypted: boolean;
+  /** Which suite decrypted the file: SUITE_ID (0x01, HPKE) or SUITE_SELF (0x02, symmetric self). */
+  suiteId: number;
 }
 
 export interface DecryptInput {
@@ -224,6 +358,8 @@ export interface DecryptStreamResult {
   senderPkRaw: Uint8Array;
   namespace: Namespace;
   selfEncrypted: boolean;
+  /** Which suite decrypted the file: SUITE_ID (0x01, HPKE) or SUITE_SELF (0x02, symmetric self). */
+  suiteId: number;
   /**
    * Yields plaintext chunks in order. Each chunk is individually AES-GCM authenticated BEFORE it is
    * yielded, but file-level integrity — that the final chunk was reached and the total decrypted size
@@ -248,18 +384,29 @@ export interface DecryptStreamResult {
 export async function decryptStream(input: DecryptStreamInput): Promise<DecryptStreamResult> {
   const source = input.file;
 
-  // §7.2 step 1: header (+ sender_pk, hpke_enc, metadata_ct_len — the fixed-size head).
-  const headFixed = HEADER_LEN + PK_LEN + ENC_LEN + 4;
-  const head = await source.slice(0, headFixed); // clamps near EOF; Reader throws "truncated" if short
-  const r = new Reader(head);
-  const header = r.take(HEADER_LEN).slice();
-  const { namespaceTag } = parseHeader(header);
+  // §7.2 step 1: read + parse the 12-byte header, then dispatch by suite.
+  const headerBytes = await source.slice(0, HEADER_LEN);
+  if (headerBytes.length < HEADER_LEN) throw new FileKeyError("unexpected end of input (truncated header)", "truncated");
+  const header = headerBytes.subarray(0, HEADER_LEN).slice();
+  const { suiteId, namespaceTag } = parseHeader(header);
 
   // §7.2 step 2: dispatch by tag.
   const namespace = input.namespaces.matchTag(namespaceTag);
   if (!namespace) {
     throw new FileKeyError(`no configured namespace matches file tag 0x${toHex(namespaceTag)}`, "wrong_namespace");
   }
+
+  // Suite 0x02: symmetric self-encryption (§6.5). Different body grammar (no sender_pk/hpke_enc), so
+  // we dispatch here, before reading any HPKE-specific field.
+  if (suiteId === SUITE_SELF) {
+    return decryptSelfStream(source, header, namespace, input.resolveIdentity);
+  }
+
+  // Suite 0x01: HPKE Auth. Read the rest of the fixed head (sender_pk, hpke_enc, metadata_ct_len).
+  const headFixed = HEADER_LEN + PK_LEN + ENC_LEN + 4;
+  const head = await source.slice(0, headFixed); // clamps near EOF; Reader throws "truncated" if short
+  const r = new Reader(head);
+  r.take(HEADER_LEN); // header already parsed above
 
   // §7.2 steps 3–4: sender_pk, hpke_enc.
   const senderPk = r.take(PK_LEN).slice();
@@ -312,6 +459,57 @@ export async function decryptStream(input: DecryptStreamInput): Promise<DecryptS
     senderPkRaw: senderPk,
     namespace,
     selfEncrypted,
+    suiteId: SUITE_ID,
+    chunks: openStream(source, payloadStart, payloadKey, aad, metadata.originalSize),
+  };
+}
+
+/**
+ * Suite 0x02 streaming decryption (§6.5). Body grammar: header(12) ‖ file_salt(32) ‖ u32(metaCtLen) ‖
+ * metaCt ‖ payload chunks. Keys come from the resolved identity's master_prk — no HPKE, no sender_pk.
+ */
+async function decryptSelfStream(
+  source: ByteSource,
+  header: Uint8Array,
+  namespace: Namespace,
+  resolveIdentity: (namespace: Namespace) => Promise<Identity>,
+): Promise<DecryptStreamResult> {
+  const headFixed = HEADER_LEN + SELF_SALT_LEN + 4;
+  const head = await source.slice(0, headFixed);
+  const r = new Reader(head);
+  r.take(HEADER_LEN); // header already parsed by the caller
+  const fileSalt = r.take(SELF_SALT_LEN).slice();
+
+  // Resolve the recipient identity (may trigger WebAuthn). Suite 0x02 needs its retained master_prk.
+  const identity = await resolveIdentity(namespace);
+  if (identity.namespace.canonicalRpId !== namespace.canonicalRpId) {
+    throw new FileKeyError("resolved identity is not in the file's namespace", "identity_namespace_mismatch");
+  }
+  if (!identity.masterPrk || identity.masterPrk.length !== 32) {
+    throw new FileKeyError("resolved identity has no master_prk; suite 0x02 decryption requires it", "master_prk_missing");
+  }
+
+  const { payloadKey, metadataKey } = await deriveSelfKeys(identity.masterPrk, namespace.rpIdBytes, fileSalt);
+  const aad = buildSelfAad(header, fileSalt);
+
+  const metaCtLen = r.u32();
+  if (metaCtLen > METADATA_CT_MAX || metaCtLen < METADATA_CT_MIN) {
+    throw new FileKeyError(`metadata_ct_len ${metaCtLen} out of bounds`, "metadata_ct_bounds");
+  }
+  const metaCt = await source.slice(headFixed, headFixed + metaCtLen);
+  if (metaCt.length !== metaCtLen) throw new FileKeyError("unexpected end of input (truncated file)", "truncated");
+  const metaPt = await aesOpen(metadataKey, METADATA_NONCE, aad, metaCt);
+  const metadata = decodeMetadata(metaPt);
+
+  const payloadStart = headFixed + metaCtLen;
+  return {
+    metadata,
+    // A self-encrypted file's "sender" is, by construction, the decrypting identity. There is no
+    // sender field in the file and no sender authentication (see DecryptResult.senderPkRaw / suiteId).
+    senderPkRaw: identity.staticPkRaw,
+    namespace,
+    selfEncrypted: true,
+    suiteId: SUITE_SELF,
     chunks: openStream(source, payloadStart, payloadKey, aad, metadata.originalSize),
   };
 }
@@ -384,5 +582,6 @@ export async function decrypt(input: DecryptInput): Promise<DecryptResult> {
     senderPkRaw: res.senderPkRaw,
     namespace: res.namespace,
     selfEncrypted: res.selfEncrypted,
+    suiteId: res.suiteId,
   };
 }

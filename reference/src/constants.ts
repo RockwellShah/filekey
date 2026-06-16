@@ -1,7 +1,8 @@
 // FileKey v0.4.7 protocol constants (spec §3, §5, §6).
 
 export const FORMAT_VERSION = 0x01;
-export const SUITE_ID = 0x01;
+export const SUITE_ID = 0x01; // HPKE Auth, DHKEM(P-256)+AES-256-GCM-STREAM (§3)
+export const SUITE_SELF = 0x02; // symmetric self-encryption — no KEM, post-quantum-safe (§5.6, §6.5)
 export const SK_VERSION = 0x01; // share-key encoding version (§4.4)
 export const REC_VERSION = 0x01; // recovery-code encoding version (§4.6.3)
 
@@ -19,6 +20,7 @@ export const GCM_TAG_LEN = 16;
 export const NONCE_LEN = 12;
 export const COUNTER_LEN = 11; // big-endian chunk counter (§5.5)
 export const MAX_CHUNK_INDEX = 2 ** 32; // reject i >= 2^32 (§5.5 counter cap)
+export const SELF_SALT_LEN = 32; // per-file salt for suite 0x02 self-encryption (§5.6)
 
 export const METADATA_PLAINTEXT_MAX = 1_048_576; // 1 MiB (§5.4.1 rule 7)
 export const METADATA_CT_MAX = 1_048_592; // 1 MiB + 16-byte tag (§5.4.3)
@@ -32,6 +34,8 @@ export const LABEL_IDENTITY_KEM = "FILEKEY-v1/identity-kem"; // HKDF-Expand info
 export const LABEL_HPKE_INFO = "FILEKEY-v1/hpke-info"; // HPKE info prefix (§6.2)
 export const LABEL_PAYLOAD_KEY = "FILEKEY-v1 payload-key"; // HPKE export ctx (§6.3)
 export const LABEL_METADATA_KEY = "FILEKEY-v1 metadata-key"; // HPKE export ctx (§6.3)
+export const LABEL_SELF_PAYLOAD_KEY = "FILEKEY-v1/self-payload-key"; // HKDF-Expand info, suite 0x02 (§6.5)
+export const LABEL_SELF_METADATA_KEY = "FILEKEY-v1/self-metadata-key"; // HKDF-Expand info, suite 0x02 (§6.5)
 export const LABEL_FINGERPRINT = "FILEKEY-v1/fingerprint"; // identity fingerprint (§4.7)
 
 export const SHARE_KEY_HRP = "fkey";

@@ -10,6 +10,7 @@
 // Cancellation is the client calling worker.terminate(), so there is no in-worker cancel flag.
 import {
   encryptStream,
+  selfEncryptStream,
   decryptStream,
   Namespace,
   NamespaceSet,
@@ -20,6 +21,13 @@ import {
 } from "../src/index.js";
 import { zipBundleToBlob, type BundleItem } from "./bundle.js";
 
+// `selfEncrypt: true` is the EXPLICIT self-encryption intent → the worker uses suite 0x02 (symmetric, no
+// KEM, post-quantum-safe) with `senderMasterPrk` and REQUIRES it (a self job missing master_prk is a loud
+// error, never a silent regression to suite 0x01). Without `selfEncrypt`, the recipient is someone else →
+// HPKE suite 0x01 (sharing). master_prk is the session root; passing it into this same-origin, same-bundle
+// worker is consistent with the worker already receiving `senderKeyPair` (the identity private key).
+// master_prk is strictly more powerful in general (it is the root that derives that keypair), but in this
+// single-namespace v1 app it compromises the same one identity, and there is no page↔worker trust boundary.
 type EncryptJob = {
   kind: "encrypt";
   rpId: string;
@@ -28,6 +36,8 @@ type EncryptJob = {
   recipientPk: Uint8Array;
   blob: Blob;
   metadata: Omit<Metadata, "originalSize">;
+  selfEncrypt?: boolean;
+  senderMasterPrk?: Uint8Array;
 };
 type ZipEncryptJob = {
   kind: "zipEncrypt";
@@ -38,8 +48,12 @@ type ZipEncryptJob = {
   items: BundleItem[];
   totalBytes: number;
   metadata: Omit<Metadata, "originalSize">;
+  selfEncrypt?: boolean;
+  senderMasterPrk?: Uint8Array;
 };
-type DecryptJob = { kind: "decrypt"; rpId: string; rpIds: string[]; keyPair: CryptoKeyPair; staticPk: Uint8Array; file: Blob };
+// `masterPrk` lets the worker decrypt suite 0x02 self files (it derives the file keys from the file's
+// salt). Absent it, only suite 0x01 (HPKE, via keyPair) decrypts. Same trust rationale as above.
+type DecryptJob = { kind: "decrypt"; rpId: string; rpIds: string[]; keyPair: CryptoKeyPair; staticPk: Uint8Array; file: Blob; masterPrk?: Uint8Array };
 type Job = EncryptJob | ZipEncryptJob | DecryptJob;
 
 // tsconfig uses the DOM lib (not WebWorker), so `self` is typed as Window; narrow to the bits we use.
@@ -62,7 +76,6 @@ function blobSource(blob: Blob, onRead?: (highWater: number) => void): ByteSourc
 
 async function runEncrypt(job: EncryptJob | ZipEncryptJob): Promise<{ blob: Blob; shareSource?: Blob }> {
   const ns = new Namespace(job.rpId);
-  const senderIdentity: Identity = { namespace: ns, keyPair: job.senderKeyPair, staticPkRaw: job.senderPk };
   let plaintext: ByteSource;
   let shareSource: Blob | undefined;
   if (job.kind === "zipEncrypt") {
@@ -75,15 +88,31 @@ async function runEncrypt(job: EncryptJob | ZipEncryptJob): Promise<{ blob: Blob
   } else {
     plaintext = blobSource(job.blob, (hw) => progress(hw, job.blob.size));
   }
-  const parts: Blob[] = [];
-  for await (const piece of encryptStream({ senderIdentity, recipientPkRaw: job.recipientPk, namespace: ns, plaintext, metadata: job.metadata })) {
-    parts.push(new Blob([piece as unknown as BlobPart]));
+  // Explicit `selfEncrypt` intent → suite 0x02 (no KEM, post-quantum-safe). The master_prk guard turns a
+  // future refactor that forgets to pass it into a LOUD failure rather than a silent regression to suite
+  // 0x01. Otherwise the recipient is someone else → HPKE suite 0x01 (sharing). Both reuse the src/ core.
+  let stream: AsyncGenerator<Uint8Array>;
+  if (job.selfEncrypt) {
+    if (!job.senderMasterPrk) throw new FileKeyError("self-encryption requires master_prk (suite 0x02)", "master_prk_missing");
+    stream = selfEncryptStream({ masterPrk: job.senderMasterPrk, namespace: ns, plaintext, metadata: job.metadata });
+  } else {
+    stream = encryptStream({
+      senderIdentity: { namespace: ns, keyPair: job.senderKeyPair, staticPkRaw: job.senderPk },
+      recipientPkRaw: job.recipientPk,
+      namespace: ns,
+      plaintext,
+      metadata: job.metadata,
+    });
   }
+  const parts: Blob[] = [];
+  for await (const piece of stream) parts.push(new Blob([piece as unknown as BlobPart]));
   return { blob: new Blob(parts, { type: "application/octet-stream" }), shareSource };
 }
 
 async function runDecrypt(job: DecryptJob): Promise<{ blob: Blob; metadata: Metadata }> {
-  const identity: Identity = { namespace: new Namespace(job.rpId), keyPair: job.keyPair, staticPkRaw: job.staticPk };
+  // master_prk is included so suite 0x02 self files decrypt (decryptSelfStream derives the file keys from
+  // it); suite 0x01 ignores it and uses keyPair. Absent (older callers) → only 0x01 decrypts.
+  const identity: Identity = { namespace: new Namespace(job.rpId), keyPair: job.keyPair, staticPkRaw: job.staticPk, masterPrk: job.masterPrk };
   const res = await decryptStream({ file: blobSource(job.file), namespaces: new NamespaceSet(job.rpIds), resolveIdentity: async () => identity });
   const total = res.metadata.originalSize;
   const parts: Blob[] = [];
