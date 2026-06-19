@@ -1312,7 +1312,7 @@ async function intro() {
     " group or ",
     { html: extLinkDot("https://filekey.substack.com/", "Substack") },
   ], { speed: 12 });
-  const m = await appMsg(["To start, unlock with your existing passkey or create a new one."]);
+  const m = await appMsg(["To start, unlock your existing passkey or create a new one."]);
   buttonRow(m, [
     { label: "Unlock", icon: SVG.fingerprint.replace("<svg", '<svg class="fp_icon"'), onClick: () => void loadSecKey() },
     { label: "Create", ghost: true, icon: SVG.plus.replace("<svg", '<svg class="plus_icon"'), onClick: () => void genNewPasskey() },
