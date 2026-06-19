@@ -1,0 +1,9 @@
+{
+  "name": "filekey-e2e",
+  "private": true,
+  "type": "module",
+  "description": "Headless differential E2E harness for FileKey (suite 0x02), virtual-passkey driven.",
+  "dependencies": {
+    "playwright-core": "^1.61.0"
+  }
+}

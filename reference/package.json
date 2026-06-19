@@ -10,6 +10,7 @@
   },
   "scripts": {
     "test": "bun test",
+    "e2e": "node e2e/run.mjs",
     "vectors": "bun run test/gen-vectors.ts",
     "gen:source": "bun run web/gen-source.ts",
     "build:recover": "bun run web/build-recover.ts",
