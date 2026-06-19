@@ -17,6 +17,19 @@ node run.mjs           # full suite; prints a pass/fail matrix, exit 0 if all cr
 Standalone de-risk scripts (subsets, faster to iterate on):
 `derisk-identity.mjs`, `derisk-roundtrip.mjs`, `derisk-large.mjs`, `derisk-share.mjs`.
 
+Cross-engine crypto portability (Chromium + WebKit/Safari + Firefox), no WebAuthn needed:
+
+```
+npx playwright install webkit firefox            # one-time: the non-Chromium engines
+bun build e2e/cross-engine-entry.js --target browser --format iife --outfile e2e/cross-engine-bundle.js
+node cross-engine.mjs                             # runs suite-0x02 encrypt/decrypt + identity on all 3
+```
+
+It serves the real reference core over `http://localhost` (a secure context, so `crypto.subtle`
+works) and asserts the deterministic 0x02 output + derived identity are byte-identical on every engine.
+The virtual-passkey UI harness (`run.mjs`) is Chromium-only because the CDP virtual authenticator is a
+Chrome feature; this script covers the crypto on the other engines instead.
+
 ## Browser
 
 Uses a local Playwright "Google Chrome for Testing" (Chromium) build via `executablePath`.
