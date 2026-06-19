@@ -38,9 +38,12 @@ async function selfRoundtrip(page, fx, expectName, { timeout } = {}) {
   let stagingSmallEnc; // a suite-0x02 file, reused for fail-closed + wrong-identity
   let prodSmallEncPath; // a suite-0x01 file, reused for backward-compat
   let fpAlice;
+  let harnessError = null;
+  let workers = 0;
   try {
     console.log("== STAGING self-encryption (suite 0x02), Alice ==");
     const A = await newSession(browser);
+    A.page.on("worker", () => workers++); // count Web Workers (large files route to web/worker.ts)
     await gotoAndAuth(A.page, STAGING, { create: true });
     fpAlice = await fingerprint(A.page);
 
@@ -54,15 +57,25 @@ async function selfRoundtrip(page, fx, expectName, { timeout } = {}) {
     const rUni = await selfRoundtrip(A.page, uni, true);
     record("staging self round-trip: unicode/long filename", true, rUni.suite === 0x02 && rUni.match && rUni.nameOk, `name restored=${rUni.nameOk} (${rUni.decName})`);
 
+    const wBefore = workers;
     const rBig = await selfRoundtrip(A.page, big, false, { timeout: 240000 });
-    record("staging self round-trip: 65 MiB (worker path)", true, rBig.suite === 0x02 && rBig.match, `suite 0x${rBig.suite.toString(16)}, match=${rBig.match}`);
+    const workerRan = workers > wBefore; // a Web Worker must have been created for the >=64 MiB path
+    record("staging self round-trip: 65 MiB (worker path)", true, rBig.suite === 0x02 && rBig.match && workerRan, `suite 0x${rBig.suite.toString(16)}, match=${rBig.match}, workerCreated=${workerRan}`);
 
-    // bundle: 2 files -> zip -> self-encrypt 0x02 -> decrypt -> valid zip
+    // bundle: 2 files -> zip -> self-encrypt 0x02 -> decrypt -> verify the zip's exact entries + hashes
     const encB = await dropAndSave(A.page, [b1.p, b2.p]);
     const encBPath = save(encB.name, encB.bytes);
     const decB = await dropAndSave(A.page, encBPath);
-    const isZip = decB.bytes[0] === 0x50 && decB.bytes[1] === 0x4b;
-    record("staging self round-trip: folder/bundle", true, suiteByte(encB.bytes) === 0x02 && isZip && decB.bytes.length > 0, `suite 0x${suiteByte(encB.bytes).toString(16)}, decrypted is valid zip=${isZip}`);
+    let bundleOk = false, bundleDetail = "";
+    try {
+      const { unzipSync } = await import("fflate");
+      const entries = unzipSync(new Uint8Array(decB.bytes));
+      const oneOk = entries["one.txt"] && sha(Buffer.from(entries["one.txt"])) === b1.hash;
+      const twoOk = entries["two.txt"] && sha(Buffer.from(entries["two.txt"])) === b2.hash;
+      bundleOk = !!(oneOk && twoOk);
+      bundleDetail = `entries=${JSON.stringify(Object.keys(entries))}, one=${!!oneOk}, two=${!!twoOk}`;
+    } catch (e) { bundleDetail = "unzip failed: " + String((e && e.message) || e); }
+    record("staging self round-trip: folder/bundle", true, suiteByte(encB.bytes) === 0x02 && bundleOk, `suite 0x${suiteByte(encB.bytes).toString(16)}, ${bundleDetail}`);
 
     console.log("== Cross-version differential (prod = old code) ==");
     await gotoAndAuth(A.page, PROD, { create: false });
@@ -78,7 +91,7 @@ async function selfRoundtrip(page, fx, expectName, { timeout } = {}) {
     const fc = await dropExpectFail(A.page, fcPath);
     let prodMsg = "";
     try { prodMsg = (await A.page.locator(".std_msg, .std_status").last().innerText({ timeout: 2000 })).replace(/\s+/g, " ").trim().slice(0, 80); } catch {}
-    record("forward fail-closed: prod rejects 0x02 (no plaintext)", true, !fc.newOutputCard && !fc.plaintextDownloaded, `errorShownDp=${fc.errorShown}, userMsg="${prodMsg}"`);
+    record("forward fail-closed: prod rejects 0x02 (no plaintext)", true, fc.processed && fc.rejected && !fc.newOutputCard && !fc.plaintextDownloaded, `processed=${fc.processed}, rejected=${fc.rejected}, noCard=${!fc.newOutputCard}, userMsg="${prodMsg}"`);
 
     // backward compat: staging (new) decrypts the prod 0x01 file
     await gotoAndAuth(A.page, STAGING, { create: false });
@@ -93,7 +106,7 @@ async function selfRoundtrip(page, fx, expectName, { timeout } = {}) {
 
     // wrong identity: Bob cannot decrypt Alice's 0x02 file
     const wrong = await dropExpectFail(B.page, fcPath);
-    record("wrong identity cannot decrypt a 0x02 self file", true, !wrong.newOutputCard && !wrong.plaintextDownloaded, `no plaintext leaked`);
+    record("wrong identity cannot decrypt a 0x02 self file", true, wrong.processed && wrong.rejected && !wrong.newOutputCard && !wrong.plaintextDownloaded, `processed=${wrong.processed}, rejected=${wrong.rejected}, noPlaintext=${!wrong.plaintextDownloaded}`);
 
     console.log("== Sharing (unchanged 0x01 HPKE; best-effort) ==");
     try {
@@ -126,18 +139,39 @@ async function selfRoundtrip(page, fx, expectName, { timeout } = {}) {
       record("sharing: Alice -> Bob round-trip (suite 0x01)", false, false, "selectors need iteration: " + String(e.message || e).slice(0, 120));
     }
   } catch (e) {
-    console.error("HARNESS_ERROR:", (e && e.stack) || e);
+    harnessError = String((e && e.stack) || e);
+    console.error("HARNESS_ERROR:", harnessError);
   } finally {
     await browser.close();
   }
 
+  // A trustworthy gate requires every expected critical cell to have RUN and passed. A mid-run exception
+  // (harnessError) or a cell that never executed counts as FAIL, never a silent green.
+  const EXPECTED_CRITICAL = [
+    "staging self round-trip: small",
+    "staging self round-trip: empty file",
+    "staging self round-trip: unicode/long filename",
+    "staging self round-trip: 65 MiB (worker path)",
+    "staging self round-trip: folder/bundle",
+    "identity is the same on prod and staging",
+    "prod self-encryption is suite 0x01 (baseline)",
+    "forward fail-closed: prod rejects 0x02 (no plaintext)",
+    "backward compat: staging opens prod's 0x01 file",
+    "wrong identity cannot decrypt a 0x02 self file",
+  ];
+  const ran = new Set(results.map((r) => r.name));
+  const missing = EXPECTED_CRITICAL.filter((n) => !ran.has(n));
+
   console.log("\n================ RESULT MATRIX ================");
   for (const r of results) console.log(`  ${r.pass ? "✅" : "❌"} ${r.critical ? "[critical] " : "[extra]    "}${r.name}`);
+  for (const n of missing) console.log(`  ❌ [critical] ${n} (NEVER RAN — counted as FAIL)`);
   const critFail = results.filter((r) => r.critical && !r.pass);
   const extraFail = results.filter((r) => !r.critical && !r.pass);
   console.log("==============================================");
-  console.log(`critical: ${results.filter((r) => r.critical && r.pass).length}/${results.filter((r) => r.critical).length} pass` + (critFail.length ? `  (FAILED: ${critFail.map((r) => r.name).join("; ")})` : ""));
+  if (harnessError) console.log("HARNESS ERROR (suite did not complete): " + harnessError.split("\n")[0]);
+  console.log(`critical: ${results.filter((r) => r.critical && r.pass).length}/${EXPECTED_CRITICAL.length} pass` + (critFail.length ? `  (FAILED: ${critFail.map((r) => r.name).join("; ")})` : "") + (missing.length ? `  (MISSING: ${missing.join("; ")})` : ""));
   console.log(`extra:    ${results.filter((r) => !r.critical && r.pass).length}/${results.filter((r) => !r.critical).length} pass` + (extraFail.length ? `  (failed: ${extraFail.map((r) => r.name).join("; ")})` : ""));
-  console.log("SUITE: " + (critFail.length === 0 ? "PASS (all critical cells green)" : "FAIL"));
-  process.exitCode = critFail.length === 0 ? 0 : 1;
+  const ok = !harnessError && missing.length === 0 && critFail.length === 0;
+  console.log("SUITE: " + (ok ? "PASS (all critical cells ran and passed)" : "FAIL"));
+  process.exitCode = ok ? 0 : 1;
 })();

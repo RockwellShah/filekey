@@ -9,8 +9,17 @@ export const PROD = "https://filekey.app";
 export const VAUTH = { protocol: "ctap2", ctap2Version: "ctap2_1", transport: "internal", hasResidentKey: true, hasUserVerification: true, hasPrf: true, isUserVerified: true, automaticPresenceSimulation: true };
 
 export const sha = (b) => createHash("sha256").update(b).digest("hex");
-export const suiteByte = (bytes) => bytes[5];
-export const isFKEY = (b) => b[0] === 0x46 && b[1] === 0x4b && b[2] === 0x45 && b[3] === 0x59;
+export const isFKEY = (b) => b.length >= 4 && b[0] === 0x46 && b[1] === 0x4b && b[2] === 0x45 && b[3] === 0x59;
+
+/** Validate the 12-byte FileKey header (magic + version) and return the suite byte. Throws on anything
+ *  malformed, so a wrong/empty/truncated capture can never silently pass a suite-byte assertion. */
+export function parseHeader(bytes) {
+  if (!bytes || bytes.length < 12) throw new Error(`capture too short for a FileKey header (${bytes ? bytes.length : 0} bytes)`);
+  if (!isFKEY(bytes)) throw new Error(`missing FKEY magic: ${[...bytes.slice(0, 4)].map((x) => x.toString(16)).join(" ")}`);
+  if (bytes[4] !== 0x01) throw new Error(`unexpected format_version 0x${bytes[4].toString(16)}`);
+  return { version: bytes[4], suite: bytes[5] };
+}
+export const suiteByte = (bytes) => parseHeader(bytes).suite;
 
 export async function launch() {
   return chromium.launch({ headless: true, executablePath: CHROME });
@@ -44,8 +53,13 @@ export async function gotoAndAuth(page, url, { create }) {
   await page.waitForSelector("body.fk-authed", { timeout: 45000 });
 }
 
+/** Extract the real 8-hex identity fingerprint (e.g. "434D E5AB" -> "434DE5AB"). Throws if no
+ *  fingerprint is rendered, so an empty/default header can't make an identity comparison vacuously equal. */
 export async function fingerprint(page) {
-  return (await page.locator("#acct_identity").innerText()).replace(/\s+/g, " ").trim();
+  const txt = (await page.locator("#acct_identity").textContent()) || "";
+  const m = txt.match(/([0-9A-Fa-f]{4})\s+([0-9A-Fa-f]{4})/);
+  if (!m) throw new Error("no identity fingerprint rendered in #acct_identity: " + JSON.stringify(txt.replace(/\s+/g, " ").trim().slice(0, 60)));
+  return (m[1] + m[2]).toUpperCase();
 }
 
 /** Upload file(s) -> wait for the resulting download card -> click its Save -> capture the output bytes.
@@ -62,16 +76,25 @@ export async function dropAndSave(page, filePaths, { timeout = 120000 } = {}) {
   return { name: download.suggestedFilename(), bytes: readFileSync(await download.path()) };
 }
 
-/** Upload a file that SHOULD fail to decrypt; assert fail-closed: no new output card, no plaintext download. */
+/** Upload a file that SHOULD fail to decrypt. Returns positive evidence so a silent no-op can't pass:
+ *  `processed` (the file was actually ingested -> a new upload card) AND `rejected` (a visible failure
+ *  message appeared), plus `newOutputCard`/`plaintextDownloaded` which MUST be false. A real fail-closed
+ *  cell requires processed && rejected && !newOutputCard && !plaintextDownloaded. */
 export async function dropExpectFail(page, filePath, ms = 20000) {
-  const before = await page.locator(".std_download").count();
+  const cardsBefore = await page.locator(".std_download").count();
+  const uploadsBefore = await page.locator(".std_uploaded").count();
   let downloaded = false;
   const onDl = () => { downloaded = true; };
   page.on("download", onDl);
   await page.setInputFiles("#file_input", filePath);
-  const errorShown = await page.waitForSelector(".failed_dp", { timeout: ms }).then(() => true).catch(() => false);
-  await page.waitForTimeout(2500); // allow any (erroneous) card/download to appear
-  const after = await page.locator(".std_download").count();
+  const processed = await page
+    .waitForFunction((n) => document.querySelectorAll(".std_uploaded").length > n, uploadsBefore, { timeout: ms })
+    .then(() => true).catch(() => false);
+  const rejected = await page
+    .waitForFunction(() => /unsupported|corrupt|couldn'?t|can'?t|failed to (unlock|open|decrypt)|different filekey site|with this key|wrong/i.test(document.body.innerText), null, { timeout: ms })
+    .then(() => true).catch(() => false);
+  await page.waitForTimeout(2000); // allow any (erroneous) output card/download to appear
+  const newOutputCard = (await page.locator(".std_download").count()) > cardsBefore;
   page.off("download", onDl);
-  return { errorShown, newOutputCard: after > before, plaintextDownloaded: downloaded };
+  return { processed, rejected, newOutputCard, plaintextDownloaded: downloaded };
 }

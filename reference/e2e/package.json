@@ -4,6 +4,7 @@
   "type": "module",
   "description": "Headless differential E2E harness for FileKey (suite 0x02), virtual-passkey driven.",
   "dependencies": {
+    "fflate": "^0.8.3",
     "playwright-core": "^1.61.0"
   }
 }
