@@ -54,7 +54,9 @@ Override with `FILEKEY_E2E_CHROME=/path/to/chromium`. If you don't have one cach
 
 Companion scripts: `gen-icons.mjs` and `gen-og.mjs` regenerate the raster icons and the
 og share card (both self-check their output); `prod-verify.mjs` polls prod post-deploy
-for version liveness, assets, and a crypto smoke round-trip.
+for version liveness, assets, and a crypto smoke round-trip. It expects the version in
+`web/version.json` (override with `EXPECT_VERSION`), and `EXPECT_COPY` / `FORBID_COPY`
+add an optional copy gate for wording deploys.
 
 ## How the virtual passkey works
 
