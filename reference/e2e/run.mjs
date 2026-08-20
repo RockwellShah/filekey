@@ -1,8 +1,12 @@
 // FileKey suite-0x02 full differential E2E suite. Headless, virtual-passkey (zero fingerprints),
-// real deployed prod (filekey.app, old code) + staging (go.filekey.app, new code).
+// real deployed prod (filekey.app) + staging (go.filekey.app).
 // Run: node run.mjs   (exit 0 = all critical cells pass)
+// The gate EXPECTS prod to emit suite 0x02 (the steady state since 1.12.1); a prod that
+// emits 0x01 reads as a rollback and fails loudly. For a future staged migration where
+// staging is deliberately ahead of prod, run with EXPECT_PROD_SUITE=0x01 to re-enable
+// the old-prod differential assertions (fail-closed reject of the newer suite).
 import { launch, newSession, gotoAndAuth, fingerprint, dropAndSave, dropExpectFail, sha, suiteByte, isFKEY, STAGING, PROD } from "./lib.mjs";
-import { mkdtempSync, writeFileSync, readFileSync } from "node:fs";
+import { mkdtempSync, writeFileSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { randomBytes, randomFillSync } from "node:crypto";
@@ -35,12 +39,42 @@ async function selfRoundtrip(page, fx, expectName, { timeout } = {}) {
 
 (async () => {
   const browser = await launch();
-  let stagingSmallEnc; // a suite-0x02 file, reused for fail-closed + wrong-identity
-  let prodSmallEncPath; // a suite-0x01 file, reused for backward-compat
+  let stagingSmallEnc; // a suite-0x02 file, reused for the forward path + wrong-identity
+  let prodSmallEncPath; // a prod-made file (0x01 or 0x02), reused for cross-deploy compat
   let fpAlice;
   let harnessError = null;
   let workers = 0;
   try {
+    // Deploy-surface check: the static assets the head/manifest declare must actually be
+    // served. Guards the iOS favicon fix and the og card (the og:image meta tags declare
+    // 2000x1050; gen-og.mjs enforces that at build time, this enforces it at serve time).
+    console.log("== Static assets (staging) ==");
+    try {
+      const assets = ["/favicon.ico", "/apple-touch-icon.png", "/icon-192.png", "/icon-512.png", "/og.png"];
+      const checks = [];
+      let ogDetail = "";
+      for (const path of assets) {
+        const res = await fetch(STAGING + path, { signal: AbortSignal.timeout(15000) });
+        const type = res.headers.get("content-type") || "";
+        const cc = res.headers.get("cache-control") || "";
+        let ok = res.status === 200 && type.startsWith("image/");
+        // The icons ship with a vercel.json Cache-Control rule; assert it actually matched
+        // (a silently non-matching path pattern would leave them on max-age=0 forever).
+        if (path !== "/og.png") ok = ok && cc.includes("max-age=86400");
+        const PNG_DIMS = { "/og.png": [2000, 1050], "/apple-touch-icon.png": [180, 180], "/icon-192.png": [192, 192], "/icon-512.png": [512, 512] };
+        if (PNG_DIMS[path] && ok) {
+          const b = Buffer.from(await res.arrayBuffer());
+          const w = b.length >= 24 ? b.readUInt32BE(16) : 0, h = b.length >= 24 ? b.readUInt32BE(20) : 0;
+          if (path === "/og.png") ogDetail = `, og ${w}x${h}`;
+          ok = w === PNG_DIMS[path][0] && h === PNG_DIMS[path][1];
+        }
+        checks.push({ path, ok, why: `${res.status} ${type}${cc ? " cc=" + cc : ""}` });
+      }
+      record("static assets served (icons + og card)", true, checks.every((c) => c.ok), checks.map((c) => `${c.path}=${c.ok ? "ok" : c.why}`).join(", ") + ogDetail);
+    } catch (e) {
+      record("static assets served (icons + og card)", true, false, "fetch failed: " + String((e && e.message) || e).slice(0, 120));
+    }
+
     console.log("== STAGING self-encryption (suite 0x02), Alice ==");
     const A = await newSession(browser);
     A.page.on("worker", () => workers++); // count Web Workers (large files route to web/worker.ts)
@@ -77,26 +111,38 @@ async function selfRoundtrip(page, fx, expectName, { timeout } = {}) {
     } catch (e) { bundleDetail = "unzip failed: " + String((e && e.message) || e); }
     record("staging self round-trip: folder/bundle", true, suiteByte(encB.bytes) === 0x02 && bundleOk, `suite 0x${suiteByte(encB.bytes).toString(16)}, ${bundleDetail}`);
 
-    console.log("== Cross-version differential (prod = old code) ==");
+    console.log("== Cross-version differential (adapts to prod's deployed suite) ==");
     await gotoAndAuth(A.page, PROD, { create: false });
     const fpProd = await fingerprint(A.page);
     record("identity is the same on prod and staging", true, fpProd === fpAlice, `${fpProd} == ${fpAlice}`);
 
+    // Prod must emit the suite we EXPECT (default 0x02, steady state). An unexpected
+    // 0x01 here is a rollback to pre-PQ code, not a benign differential state; only an
+    // explicit EXPECT_PROD_SUITE=0x01 (staged-migration mode) accepts it.
+    const EXPECT_PROD_SUITE = parseInt(process.env.EXPECT_PROD_SUITE || "0x02", 16);
     const prodEnc = await dropAndSave(A.page, small.p);
     prodSmallEncPath = save(prodEnc.name.replace(".filekey", ".prod.filekey"), prodEnc.bytes);
-    record("prod self-encryption is suite 0x01 (baseline)", true, suiteByte(prodEnc.bytes) === 0x01, `suite 0x${suiteByte(prodEnc.bytes).toString(16)}`);
+    const prodSuite = suiteByte(prodEnc.bytes);
+    const prodIsOld = prodSuite === 0x01;
+    record("prod self-encryption suite matches the expected deploy state", true, prodSuite === EXPECT_PROD_SUITE, `suite 0x${prodSuite.toString(16)}, expected 0x${EXPECT_PROD_SUITE.toString(16)}${prodIsOld && EXPECT_PROD_SUITE === 0x01 ? " (staged-migration mode: staging ahead of prod)" : ""}`);
 
-    // forward fail-closed: prod (old) fed a 0x02 file
+    // forward path: prod fed staging's 0x02 file. Old prod must fail closed; current prod must open it.
+    const fcIs02 = suiteByte(stagingSmallEnc) === 0x02; // assert the cell's own input, not just inherit it
     const fcPath = save("incoming-0x02.filekey", stagingSmallEnc);
-    const fc = await dropExpectFail(A.page, fcPath);
-    let prodMsg = "";
-    try { prodMsg = (await A.page.locator(".std_msg, .std_status").last().innerText({ timeout: 2000 })).replace(/\s+/g, " ").trim().slice(0, 80); } catch {}
-    record("forward fail-closed: prod rejects 0x02 (no plaintext)", true, fc.processed && fc.rejected && !fc.newOutputCard && !fc.plaintextDownloaded, `processed=${fc.processed}, rejected=${fc.rejected}, noCard=${!fc.newOutputCard}, userMsg="${prodMsg}"`);
+    if (prodIsOld) {
+      const fc = await dropExpectFail(A.page, fcPath);
+      let prodMsg = "";
+      try { prodMsg = (await A.page.locator(".std_msg, .std_status").last().innerText({ timeout: 2000 })).replace(/\s+/g, " ").trim().slice(0, 80); } catch {}
+      record("forward path: prod handles staging's 0x02 file correctly", true, fcIs02 && fc.processed && fc.rejected && !fc.newOutputCard && !fc.plaintextDownloaded, `input=0x02:${fcIs02}, old prod fail-closed: processed=${fc.processed}, rejected=${fc.rejected}, noCard=${!fc.newOutputCard}, userMsg="${prodMsg}"`);
+    } else {
+      const fwd = await dropAndSave(A.page, fcPath);
+      record("forward path: prod handles staging's 0x02 file correctly", true, fcIs02 && sha(fwd.bytes) === small.hash, `input=0x02:${fcIs02}, current prod decrypts 0x02: bytes match=${sha(fwd.bytes) === small.hash}`);
+    }
 
-    // backward compat: staging (new) decrypts the prod 0x01 file
+    // cross-deploy compat: staging (new) decrypts whatever prod produced (0x01 or 0x02)
     await gotoAndAuth(A.page, STAGING, { create: false });
     const decProd = await dropAndSave(A.page, prodSmallEncPath);
-    record("backward compat: staging opens prod's 0x01 file", true, sha(decProd.bytes) === small.hash, `bytes match=${sha(decProd.bytes) === small.hash}`);
+    record("cross-deploy compat: staging opens prod's file", true, sha(decProd.bytes) === small.hash, `prod suite 0x${prodSuite.toString(16)}, bytes match=${sha(decProd.bytes) === small.hash}`);
 
     console.log("== Second identity (Bob) ==");
     const B = await newSession(browser);
@@ -108,7 +154,11 @@ async function selfRoundtrip(page, fx, expectName, { timeout } = {}) {
     const wrong = await dropExpectFail(B.page, fcPath);
     record("wrong identity cannot decrypt a 0x02 self file", true, wrong.processed && wrong.rejected && !wrong.newOutputCard && !wrong.plaintextDownloaded, `processed=${wrong.processed}, rejected=${wrong.rejected}, noPlaintext=${!wrong.plaintextDownloaded}`);
 
-    console.log("== Sharing (unchanged 0x01 HPKE; best-effort) ==");
+    // Sharing still emits suite 0x01 (HPKE), so this cell doubles as the deployed
+    // legacy-decrypt gate: once prod is on 0x02, no differential cell mints a 0x01
+    // file any more, and without this a broken 0x01 decryptor would strand every
+    // pre-0x02 ciphertext while the suite stayed green. Critical for that reason.
+    console.log("== Sharing (suite 0x01 HPKE; also the deployed legacy-decrypt gate) ==");
     try {
       // get Bob's share key from the menu
       await B.page.click("#acct_icon_container");
@@ -134,30 +184,33 @@ async function selfRoundtrip(page, fx, expectName, { timeout } = {}) {
       const sharedPath = save(dl.suggestedFilename(), shared);
       // Bob decrypts
       const decShared = await dropAndSave(B.page, sharedPath);
-      record("sharing: Alice -> Bob round-trip (suite 0x01)", false, suiteByte(shared) === 0x01 && sha(decShared.bytes) === small.hash, `suite 0x${suiteByte(shared).toString(16)}, match=${sha(decShared.bytes) === small.hash}`);
+      record("sharing: Alice -> Bob round-trip (suite 0x01)", true, suiteByte(shared) === 0x01 && sha(decShared.bytes) === small.hash, `suite 0x${suiteByte(shared).toString(16)}, match=${sha(decShared.bytes) === small.hash}`);
     } catch (e) {
-      record("sharing: Alice -> Bob round-trip (suite 0x01)", false, false, "selectors need iteration: " + String(e.message || e).slice(0, 120));
+      record("sharing: Alice -> Bob round-trip (suite 0x01)", true, false, "sharing flow failed: " + String(e.message || e).slice(0, 120));
     }
   } catch (e) {
     harnessError = String((e && e.stack) || e);
     console.error("HARNESS_ERROR:", harnessError);
   } finally {
     await browser.close();
+    rmSync(dir, { recursive: true, force: true }); // ~130 MB of plaintext/ciphertext fixtures per run
   }
 
   // A trustworthy gate requires every expected critical cell to have RUN and passed. A mid-run exception
   // (harnessError) or a cell that never executed counts as FAIL, never a silent green.
   const EXPECTED_CRITICAL = [
+    "static assets served (icons + og card)",
     "staging self round-trip: small",
     "staging self round-trip: empty file",
     "staging self round-trip: unicode/long filename",
     "staging self round-trip: 65 MiB (worker path)",
     "staging self round-trip: folder/bundle",
     "identity is the same on prod and staging",
-    "prod self-encryption is suite 0x01 (baseline)",
-    "forward fail-closed: prod rejects 0x02 (no plaintext)",
-    "backward compat: staging opens prod's 0x01 file",
+    "prod self-encryption suite matches the expected deploy state",
+    "forward path: prod handles staging's 0x02 file correctly",
+    "cross-deploy compat: staging opens prod's file",
     "wrong identity cannot decrypt a 0x02 self file",
+    "sharing: Alice -> Bob round-trip (suite 0x01)",
   ];
   const ran = new Set(results.map((r) => r.name));
   const missing = EXPECTED_CRITICAL.filter((n) => !ran.has(n));

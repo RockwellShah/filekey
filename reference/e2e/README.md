@@ -38,13 +38,23 @@ Override with `FILEKEY_E2E_CHROME=/path/to/chromium`. If you don't have one cach
 
 ## What it covers (`run.mjs`)
 
+- Static assets on staging: favicon/app icons resolve as images with the intended
+  Cache-Control, and og.png serves at its declared 2000x1050.
 - Staging self round-trips (suite 0x02): small, empty, unicode/long filename, 65 MiB (worker path), folder bundle.
 - Same passkey == same identity on both sites (shared RP-ID `filekey.app`).
-- Prod self-encryption is suite 0x01 (baseline, old code).
-- **Backward compat**: staging opens a prod-made 0x01 file.
-- **Forward fail-closed**: prod rejects a staging 0x02 file with a clear error, no plaintext.
+- Prod emits the EXPECTED suite (default 0x02; a prod that emits 0x01 reads as a
+  rollback and fails loudly). For the next staged suite rollout, run with
+  `EXPECT_PROD_SUITE=0x01` to re-enable the old-prod differential assertions.
+- **Forward path**: prod opens a staging 0x02 file byte-exactly (or, in staged-migration
+  mode, rejects it fail-closed with no plaintext).
+- **Cross-deploy compat**: staging opens a prod-made file.
 - Wrong identity cannot decrypt a 0x02 self file.
-- Sharing: Alice → Bob round-trip (suite 0x01 HPKE, unchanged).
+- Sharing: Alice → Bob round-trip (suite 0x01 HPKE). Critical on purpose: once prod is
+  on 0x02 this is the standing deployed-app proof that legacy 0x01 files still decrypt.
+
+Companion scripts: `gen-icons.mjs` and `gen-og.mjs` regenerate the raster icons and the
+og share card (both self-check their output); `prod-verify.mjs` polls prod post-deploy
+for version liveness, assets, and a crypto smoke round-trip.
 
 ## How the virtual passkey works
 
