@@ -3,15 +3,14 @@
 <head>
 <meta charset="utf-8" />
 <style>
-@font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: block; src: url('/fonts/inter.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: block; src: url('web/fonts/inter.woff2') format('woff2'); }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { width: 1200px; height: 630px; }
 body { display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; font-family: 'Inter', system-ui, sans-serif; color: #0a0a0a; -webkit-font-smoothing: antialiased; }
 .row { font-size: 150px; display: flex; align-items: center; gap: 0.22em; }
 .logo { height: 1em; width: 0.815em; }
 .name { font-size: 1em; font-weight: 680; letter-spacing: -0.035em; line-height: 1; }
-.tag { margin-top: 56px; font-size: 44px; font-weight: 560; color: #161616; letter-spacing: -0.5px; }
-.points { margin-top: 30px; font-size: 28px; font-weight: 500; color: #8a8a92; letter-spacing: 0.2px; }
+.tag { margin-top: 64px; font-size: 58px; font-weight: 560; color: #161616; letter-spacing: -0.012em; }
 </style>
 </head>
 <body>
@@ -20,13 +19,13 @@ body { display: flex; flex-direction: column; align-items: center; justify-conte
     <div class="name">FileKey</div>
   </div>
   <div class="tag">Encrypt and share files with passkeys</div>
-  <div class="points">No account&nbsp; ·&nbsp; Offline&nbsp; ·&nbsp; Open source</div>
   <script>
     (async () => {
       try { await document.fonts.ready; } catch (e) {}
       const row = document.querySelector('.row'), tag = document.querySelector('.tag');
       // Scale the logo + "FileKey" so the row spans exactly the subtitle's width.
       for (let i = 0; i < 5; i++) {
+        if (!row.offsetWidth || !tag.offsetWidth) break;
         const fs = parseFloat(getComputedStyle(row).fontSize);
         row.style.fontSize = (fs * tag.offsetWidth / row.offsetWidth) + 'px';
       }

@@ -161,7 +161,9 @@ function layout(o: { title: string; description: string; canonical: string; ogTy
     "<title>" + esc(o.title) + "</title>\n" +
     '<meta name="description" content="' + esc(o.description) + '">\n' +
     '<link rel="canonical" href="' + o.canonical + '">\n' +
+    '<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">\n' +
     '<link rel="icon" href="/logo.svg" type="image/svg+xml">\n' +
+    '<link rel="apple-touch-icon" href="/apple-touch-icon.png">\n' +
     '<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">\n' +
     '<meta name="theme-color" content="#0c0c0e" media="(prefers-color-scheme: dark)">\n' +
     '<meta property="og:type" content="' + (o.ogType || "website") + '">\n' +

@@ -1,6 +1,13 @@
 {
-  "current": "1.12",
+  "current": "1.12.1",
   "releases": {
+    "1.12.1": {
+      "date": "2026-08-20",
+      "notes": [
+        "Sharing filekey.app now shows a cleaner, bolder link preview.",
+        "The FileKey icon now appears correctly on iOS tabs, bookmarks, and home screens, and is precached so the installed app looks right even offline."
+      ]
+    },
     "1.12": {
       "date": "2026-06-13",
       "notes": [

@@ -4,6 +4,7 @@
 
 # Dependencies & build output
 node_modules/
+.wrangler/
 reference/web/dist/
 reference/web/source.txt
 reference/web/recover.html
