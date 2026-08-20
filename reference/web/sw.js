@@ -2,14 +2,19 @@
 // Precaches the app shell so FileKey installs as a PWA and runs fully offline
 // (the crypto is all client-side). Strategy: network-first, so an online reload
 // always gets fresh code, falling back to cache when offline.
-const CACHE = "filekey-ref-v6";
+const CACHE = "filekey-ref-v7";
 // /dist/worker.js is precached so large-file (>=64MB) encrypt/decrypt works offline on first run, not
 // only after a prior online large-file op network-cached it.
 const SHELL = ["/", "/index.html", "/dist/app.js", "/dist/worker.js", "/recover.html", "/manifest.json", "/icon.svg", "/logo.svg", "/fonts/inter.woff2"];
+// The raster icons (~9 KB) are cosmetic offline, so they precache best-effort: a flaky
+// icon fetch must never abort the whole shell upgrade (addAll is all-or-nothing).
+const SHELL_OPTIONAL = ["/icon-192.png", "/icon-512.png", "/apple-touch-icon.png", "/favicon.ico"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()),
+    caches.open(CACHE)
+      .then((c) => c.addAll(SHELL).then(() => c.addAll(SHELL_OPTIONAL).catch(() => {})))
+      .then(() => self.skipWaiting()),
   );
 });
 
